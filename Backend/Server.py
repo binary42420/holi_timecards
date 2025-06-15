@@ -73,7 +73,7 @@ print(f"   Database initialized: {database_initialized}")
 user_sessions = {}  # Dictionary to store sessions by client_id
 
 
-def handle_request(request_id, data, client_id=None, session_id=None, csrf_token=None):
+async def handle_request(request_id, data, client_id=None, session_id=None, csrf_token=None):
     global user_sessions
     from security.secure_session import secure_session_manager
 
@@ -1179,52 +1179,7 @@ def handle_request(request_id, data, client_id=None, session_id=None, csrf_token
         return {"request_id": request_id, "success": False, "error": f"Unknown request ID: {request_id}"}
 
 
-async def handle_client(websocket, path=None):
-    client_id = id(websocket)
-    client_ip = websocket.remote_address[0] if websocket.remote_address else "unknown"
-    logger.info(f"New client connected: {client_id} from {client_ip}")
-
-    try:
-        async for message in websocket:
-            try:
-                logger.info(f"Received message from client {client_id}: {message[:100]}...")
-                request = json.loads(message)
-                request_id = request.get('request_id')
-                data = request.get('data', {})
-
-                # Use the existing handle_request function with client_id
-                response = handle_request(request_id, data, client_id)
-
-                # Send response back to client
-                await websocket.send(json.dumps(response))
-                logger.info(f"Sent response to client {client_id} for request {request_id}")
-
-            except json.JSONDecodeError:
-                logger.error(f"Invalid JSON from client {client_id}")
-                await websocket.send(json.dumps({
-                    "success": False,
-                    "error": "Invalid JSON"
-                }))
-            except Exception as e:
-                logger.exception(f"Error processing message from client {client_id}: {str(e)}")
-                await websocket.send(json.dumps({
-                    "request_id": request.get('request_id') if 'request' in locals() else None,
-                    "success": False,
-                    "error": f"Server error: {str(e)}"
-                }))
-    except websockets.exceptions.ConnectionClosed as e:
-        logger.info(f"Client {client_id} disconnected: {e.code} {e.reason}")
-    except Exception as e:
-        logger.exception(f"Unexpected error with client {client_id}: {str(e)}")
-    finally:
-        # Clean up session when client disconnects
-        if client_id in user_sessions:
-            session = user_sessions[client_id]
-            del user_sessions[client_id]
-            logger.info(f"Cleaned up session for client {client_id}: {session}")
-        else:
-            logger.info(f"No session found for client {client_id} during cleanup")
-        logger.info(f"Client {client_id} connection closed")
+# Removed old websockets handler - using aiohttp WebSocket handler instead
 
 
 async def handle_http_request(request):
@@ -1439,28 +1394,44 @@ async def handle_workplace_migration_request(request):
 
 
 async def handle_websocket_request(request):
-    """Handle WebSocket upgrade requests"""
+    """Handle WebSocket upgrade requests with improved async error handling"""
     from websocket.redis_websocket_manager import redis_websocket_manager
-    ws = web.WebSocketResponse(heartbeat=30)  # Add heartbeat to keep connection alive
+
+    # Create WebSocket response with heartbeat for connection health
+    ws = web.WebSocketResponse(heartbeat=30, timeout=60)
     await ws.prepare(request)
 
-    client_id = id(ws)
+    client_id = str(id(ws))  # Convert to string for consistency
     client_ip = request.remote if request.remote else "unknown"
     logger.info(f"New WebSocket client connected: {client_id} from {client_ip}")
+
+    # Register connection with Redis manager
+    try:
+        await redis_websocket_manager.register_connection_async(ws, client_id, {
+            'client_ip': client_ip,
+            'connected_at': datetime.now(timezone.utc).isoformat()
+        })
+    except Exception as e:
+        logger.warning(f"Failed to register WebSocket connection in Redis: {e}")
 
     try:
         async for msg in ws:
             if msg.type == web.WSMsgType.TEXT:
                 try:
-                    logger.info(f"Received message from client {client_id}: {msg.data[:100]}...")
+                    logger.debug(f"Received message from client {client_id}: {msg.data[:100]}...")
                     request_data = json.loads(msg.data)
 
                     # Heartbeat message handling
-                    if request_data.get('type') == 'heartbeat' and request_data.get('timestamp'):
-                        # If the client sends a heartbeat, update Redis
-                        websocket_id = str(client_id)
-                        redis_websocket_manager.update_heartbeat(websocket_id)
-                        logger.debug(f"Updated heartbeat for WebSocket {websocket_id}")
+                    if request_data.get('type') == 'heartbeat':
+                        try:
+                            await redis_websocket_manager.update_heartbeat_async(client_id)
+                            await ws.send_str(json.dumps({
+                                'type': 'heartbeat_ack',
+                                'timestamp': datetime.now(timezone.utc).isoformat()
+                            }))
+                            logger.debug(f"Processed heartbeat for WebSocket {client_id}")
+                        except Exception as e:
+                            logger.warning(f"Heartbeat processing failed for {client_id}: {e}")
                         continue
 
                     request_id = request_data.get('request_id')
@@ -1472,44 +1443,75 @@ async def handle_websocket_request(request):
 
                     logger.info(f"Processing request {request_id} from client {client_id}")
                     if session_id:
-                        logger.info(f"Session authentication provided for client {client_id}")
+                        logger.debug(f"Session authentication provided for client {client_id}")
 
-                    # Use the existing handle_request function with client_id and session data
-                    response = handle_request(request_id, data, client_id, session_id, csrf_token)
+                    # Use the async handle_request function
+                    try:
+                        response = await handle_request(request_id, data, client_id, session_id, csrf_token)
+                    except Exception as e:
+                        logger.exception(f"Error in handle_request for client {client_id}: {str(e)}")
+                        response = {
+                            "request_id": request_id,
+                            "success": False,
+                            "error": f"Request processing error: {str(e)}"
+                        }
 
                     # Ensure response has request_id for client matching
                     if 'request_id' not in response:
                         response['request_id'] = request_id
 
-                    # Send response back to client
-                    response_json = json.dumps(response)
-                    await ws.send_str(response_json)
-                    logger.info(f"Sent response to client {client_id} for request {request_id}: {response.get('success', 'unknown')}")
+                    # Send response back to client with error handling
+                    try:
+                        response_json = json.dumps(response, default=str)
+                        await ws.send_str(response_json)
+                        logger.debug(f"Sent response to client {client_id} for request {request_id}: {response.get('success', 'unknown')}")
+                    except Exception as e:
+                        logger.error(f"Failed to send response to client {client_id}: {e}")
 
                 except json.JSONDecodeError as e:
                     logger.error(f"Invalid JSON from client {client_id}: {e}")
-                    await ws.send_str(json.dumps({
-                        "success": False,
-                        "error": "Invalid JSON format"
-                    }))
+                    try:
+                        await ws.send_str(json.dumps({
+                            "success": False,
+                            "error": "Invalid JSON format"
+                        }))
+                    except Exception as send_error:
+                        logger.error(f"Failed to send error response to client {client_id}: {send_error}")
+
                 except Exception as e:
                     logger.exception(f"Error processing message from client {client_id}: {str(e)}")
-                    error_response = {
-                        "request_id": request_data.get('request_id') if 'request_data' in locals() else None,
-                        "success": False,
-                        "error": f"Server error: {str(e)}"
-                    }
-                    await ws.send_str(json.dumps(error_response))
+                    try:
+                        error_response = {
+                            "request_id": request_data.get('request_id') if 'request_data' in locals() else None,
+                            "success": False,
+                            "error": f"Server error: {str(e)}"
+                        }
+                        await ws.send_str(json.dumps(error_response))
+                    except Exception as send_error:
+                        logger.error(f"Failed to send error response to client {client_id}: {send_error}")
+
             elif msg.type == web.WSMsgType.ERROR:
                 logger.error(f"WebSocket error from client {client_id}: {ws.exception()}")
                 break
             elif msg.type == web.WSMsgType.CLOSE:
                 logger.info(f"WebSocket close message from client {client_id}")
                 break
+
     except Exception as e:
         logger.exception(f"Unexpected error with WebSocket client {client_id}: {str(e)}")
     finally:
-        logger.info(f"WebSocket client {client_id} connection closed")
+        # Clean up session and Redis connection
+        try:
+            if client_id in user_sessions:
+                session = user_sessions[client_id]
+                del user_sessions[client_id]
+                logger.info(f"Cleaned up session for client {client_id}")
+
+            # Unregister from Redis manager
+            await redis_websocket_manager.unregister_connection_async(client_id)
+            logger.info(f"WebSocket client {client_id} connection closed and cleaned up")
+        except Exception as cleanup_error:
+            logger.error(f"Error during cleanup for client {client_id}: {cleanup_error}")
 
     return ws
 

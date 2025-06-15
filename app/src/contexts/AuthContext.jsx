@@ -168,117 +168,122 @@ export const AuthProvider = ({ children }) => {
       // Mark authentication in progress to prevent connection closes
       setAuthenticating(true);
 
-      // Wait for socket to be available or use existing connection
-      const waitForSocket = () => {
-        return new Promise((resolve, reject) => {
-          const maxWaitTime = 10000; // 10 seconds max wait
-          const checkInterval = 100; // Check every 100ms
-          let waitTime = 0;
+      // Wait for socket to be available with proper async handling
+      const waitForSocket = async () => {
+        const maxWaitTime = 10000; // 10 seconds max wait
+        const checkInterval = 100; // Check every 100ms
+        let waitTime = 0;
 
-          const checkSocket = () => {
-            if (socket && socket.readyState === WebSocket.OPEN) {
-              resolve(socket);
-            } else if (waitTime >= maxWaitTime) {
-              reject(new Error('WebSocket connection timeout'));
-            } else {
-              waitTime += checkInterval;
-              setTimeout(checkSocket, checkInterval);
-            }
-          };
+        while (waitTime < maxWaitTime) {
+          if (socket && socket.readyState === WebSocket.OPEN) {
+            return socket;
+          }
 
-          checkSocket();
-        });
+          // Use proper async delay instead of setTimeout in Promise
+          await new Promise(resolve => setTimeout(resolve, checkInterval));
+          waitTime += checkInterval;
+        }
+
+        throw new Error('WebSocket connection timeout');
       };
 
       const sessionSocket = await waitForSocket();
 
-      await new Promise((resolve, reject) => {
-        const timeout = setTimeout(() => {
-          setAuthenticating(false);
-          reject(new Error('Google session creation timed out'));
-        }, 15000); // Increased timeout
-
-        // Define request outside callbacks so it's accessible in both
-        const request = {
-          request_id: 69,  // GOOGLE_SESSION_CREATE
-          data: {
-            username: userData.username,
-            isManager: userData.isManager,
-            email: userData.email,
-            googleId: userData.googleId
-          }
-        };
-
-        // Send request immediately since socket is already open
-        logDebug('AuthContext', 'Sending Google session creation request via existing socket');
-        sessionSocket.send(JSON.stringify(request));
-
-        // Set up temporary message handler for this request
-        const originalOnMessage = sessionSocket.onmessage;
-        sessionSocket.onmessage = (event) => {
-          try {
-            const response = JSON.parse(event.data);
-
-            if (response.request_id === request.request_id) {
-              clearTimeout(timeout);
-              // Restore original message handler
-              sessionSocket.onmessage = originalOnMessage;
-
-              if (response.data && response.data.success) {
-                logDebug('AuthContext', 'Google session created successfully', response);
-
-                // Mark authentication as complete
-                setAuthenticating(false);
-
-                // Store user data with session info
-                const completeUserData = {
-                  ...userData,
-                  sessionId: response.data.sessionId,
-                  csrfToken: response.data.csrfToken,
-                  userId: response.data.userId,
-                  loginMethod: 'google'
-                };
-
-                setUser(completeUserData);
-                setIsAuthenticated(true);
-                setAuthError(null);
-
-                // Persist user data
-                const persistData = {
-                  username: completeUserData.username,
-                  isManager: completeUserData.isManager,
-                  userId: completeUserData.userId,
-                  email: completeUserData.email,
-                  googleId: completeUserData.googleId,
-                  loginMethod: 'google'
-                };
-                localStorage.setItem('holi_user', JSON.stringify(persistData));
-
-                // Store session data
-                sessionStorage.setItem('holi_session', JSON.stringify({
-                  sessionId: response.data.sessionId,
-                  csrfToken: response.data.csrfToken
-                }));
-
-                resolve(completeUserData);
-              } else {
-                // Mark authentication as complete (even on failure)
-                setAuthenticating(false);
-                const errorMessage = response.data?.error || response.error || 'Failed to create Google session';
-                logError('AuthContext', 'Google session creation failed', { error: errorMessage });
-                reject(new Error(errorMessage));
-              }
-            }
-          } catch (error) {
-            clearTimeout(timeout);
-            // Restore original message handler
-            sessionSocket.onmessage = originalOnMessage;
+      // Use proper async/await pattern for session creation
+      const createGoogleSession = async (socket) => {
+        return new Promise((resolve, reject) => {
+          const timeoutId = setTimeout(() => {
+            cleanup();
             setAuthenticating(false);
-            logError('AuthContext', 'Error processing Google session response', error);
-            reject(error);
+            reject(new Error('Google session creation timed out'));
+          }, 15000);
+
+          const request = {
+            request_id: 69,  // GOOGLE_SESSION_CREATE
+            data: {
+              username: userData.username,
+              isManager: userData.isManager,
+              email: userData.email,
+              googleId: userData.googleId
+            }
+          };
+
+          const handleResponse = (event) => {
+            try {
+              const response = JSON.parse(event.data);
+
+              if (response.request_id === request.request_id) {
+                cleanup();
+
+                if (response.data && response.data.success) {
+                  logDebug('AuthContext', 'Google session created successfully', response);
+
+                  const completeUserData = {
+                    ...userData,
+                    sessionId: response.data.sessionId,
+                    csrfToken: response.data.csrfToken,
+                    userId: response.data.userId,
+                    loginMethod: 'google'
+                  };
+
+                  setUser(completeUserData);
+                  setIsAuthenticated(true);
+                  setAuthError(null);
+                  setAuthenticating(false);
+
+                  // Persist user data
+                  const persistData = {
+                    username: completeUserData.username,
+                    isManager: completeUserData.isManager,
+                    userId: completeUserData.userId,
+                    email: completeUserData.email,
+                    googleId: completeUserData.googleId,
+                    loginMethod: 'google'
+                  };
+                  localStorage.setItem('holi_user', JSON.stringify(persistData));
+
+                  // Store session data
+                  sessionStorage.setItem('holi_session', JSON.stringify({
+                    sessionId: response.data.sessionId,
+                    csrfToken: response.data.csrfToken
+                  }));
+
+                  resolve(completeUserData);
+                } else {
+                  setAuthenticating(false);
+                  const errorMessage = response.data?.error || response.error || 'Failed to create Google session';
+                  logError('AuthContext', 'Google session creation failed', { error: errorMessage });
+                  reject(new Error(errorMessage));
+                }
+              }
+            } catch (error) {
+              cleanup();
+              setAuthenticating(false);
+              logError('AuthContext', 'Error processing Google session response', error);
+              reject(error);
+            }
+          };
+
+          const cleanup = () => {
+            clearTimeout(timeoutId);
+            socket.removeEventListener('message', handleResponse);
+          };
+
+          // Add event listener and send request
+          socket.addEventListener('message', handleResponse);
+
+          try {
+            logDebug('AuthContext', 'Sending Google session creation request');
+            socket.send(JSON.stringify(request));
+          } catch (sendError) {
+            cleanup();
+            setAuthenticating(false);
+            reject(sendError);
           }
-        };
-      });
+        });
+      };
+
+      await createGoogleSession(sessionSocket);
 
     } catch (error) {
       setAuthenticating(false);
