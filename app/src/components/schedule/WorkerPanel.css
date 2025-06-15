@@ -1,0 +1,282 @@
+.worker-panel {
+  width: 300px;
+  background: white;
+  border-right: 1px solid #e9ecef;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.panel-header {
+  padding: 20px;
+  background: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.panel-title {
+  margin: 0 0 15px 0;
+  color: #2c3e50;
+  font-size: 1.2em;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.panel-icon {
+  font-size: 1.1em;
+}
+
+.worker-stats {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.stat-item {
+  text-align: center;
+  flex: 1;
+}
+
+.stat-value {
+  display: block;
+  font-size: 1.3em;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 2px;
+}
+
+.stat-label {
+  font-size: 0.7em;
+  color: #7f8c8d;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 500;
+}
+
+.panel-controls {
+  padding: 15px 20px;
+  background: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.search-box {
+  position: relative;
+  margin-bottom: 15px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 10px 35px 10px 12px;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  font-size: 0.9em;
+  transition: border-color 0.2s ease;
+  box-sizing: border-box;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.1);
+}
+
+.search-icon {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #7f8c8d;
+  font-size: 0.9em;
+}
+
+.filter-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.role-filter,
+.sort-select,
+.group-select {
+  padding: 8px 10px;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  font-size: 0.8em;
+  background: white;
+  cursor: pointer;
+}
+
+.role-filter:focus,
+.sort-select:focus,
+.group-select:focus {
+  outline: none;
+  border-color: #3498db;
+}
+
+.workers-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px;
+}
+
+.worker-group {
+  margin-bottom: 20px;
+}
+
+.group-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 6px;
+  margin-bottom: 8px;
+}
+
+.group-title {
+  margin: 0;
+  font-size: 0.9em;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.group-count {
+  font-size: 0.8em;
+  color: #7f8c8d;
+  font-weight: 500;
+}
+
+.workers-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.no-workers {
+  text-align: center;
+  padding: 40px 20px;
+  color: #7f8c8d;
+}
+
+.no-workers-icon {
+  font-size: 3em;
+  margin-bottom: 15px;
+  opacity: 0.5;
+}
+
+.no-workers-text {
+  margin: 0 0 15px 0;
+  font-size: 0.9em;
+}
+
+.clear-filters-button {
+  background: #3498db;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8em;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.clear-filters-button:hover {
+  background: #2980b9;
+}
+
+.panel-footer {
+  padding: 15px 20px;
+  background: #f8f9fa;
+  border-top: 1px solid #e9ecef;
+}
+
+.drag-instructions p {
+  margin: 0 0 5px 0;
+  font-size: 0.8em;
+  color: #2c3e50;
+}
+
+.drag-instructions p:last-child {
+  margin: 0;
+  color: #7f8c8d;
+  font-size: 0.75em;
+}
+
+/* Responsive design */
+@media (max-width: 1024px) {
+  .worker-panel {
+    width: 250px;
+  }
+  
+  .panel-header {
+    padding: 15px;
+  }
+  
+  .panel-title {
+    font-size: 1.1em;
+  }
+  
+  .worker-stats {
+    gap: 8px;
+  }
+  
+  .stat-value {
+    font-size: 1.2em;
+  }
+  
+  .panel-controls {
+    padding: 12px 15px;
+  }
+}
+
+@media (max-width: 768px) {
+  .worker-panel {
+    width: 100%;
+    height: auto;
+    max-height: 300px;
+    border-right: none;
+    border-bottom: 1px solid #e9ecef;
+  }
+  
+  .panel-header {
+    padding: 15px 20px;
+  }
+  
+  .worker-stats {
+    justify-content: space-around;
+  }
+  
+  .panel-controls {
+    padding: 15px 20px;
+  }
+  
+  .filter-controls {
+    flex-direction: row;
+    gap: 10px;
+  }
+  
+  .role-filter,
+  .sort-select,
+  .group-select {
+    flex: 1;
+  }
+  
+  .workers-container {
+    max-height: 200px;
+  }
+  
+  .panel-footer {
+    display: none;
+  }
+}
+
+/* Print styles */
+@media print {
+  .worker-panel {
+    display: none;
+  }
+}

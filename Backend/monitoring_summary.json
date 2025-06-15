@@ -1,0 +1,35 @@
+{
+  "timestamp": "2025-06-11T15:03:14.069313",
+  "database": {
+    "error": "cannot import name 'engine' from 'main' (C:\\Users\\ryley\\EasyShifts\\Backend\\main.py)"
+  },
+  "redis": {
+    "ping": true,
+    "connected_clients": 1,
+    "used_memory": "2.60M",
+    "total_commands": 161,
+    "hit_ratio": 43.66197183098591,
+    "status": "needs_optimization"
+  },
+  "health": {
+    "login_test": true,
+    "database_test": true,
+    "user_count": 10,
+    "redis_test": true,
+    "overall_health": true
+  },
+  "session_fixes": {
+    "shifts_controller_import": true,
+    "multiple_sessions": true,
+    "concurrent_sessions": true,
+    "session_count_tested": 5
+  },
+  "issues": [
+    "Low Redis cache hit ratio"
+  ],
+  "successes": [
+    "Database connection pool healthy",
+    "Application health checks passed",
+    "Database session fixes working correctly"
+  ]
+}

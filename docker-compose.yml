@@ -1,0 +1,26 @@
+# Docker Compose for building images locally before Cloud Run deployment
+# This is NOT for local testing - only for building containers on Windows 11
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./Backend
+      dockerfile: Dockerfile
+    image: holi-timesheets-backend:local
+    # No ports exposed - this is just for building
+    environment:
+      - ENVIRONMENT=production
+    profiles:
+      - build-only
+
+  frontend:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    image: holi-timesheets-frontend:local
+    # No ports exposed - this is just for building
+    environment:
+      - REACT_APP_ENV=production
+    profiles:
+      - build-only

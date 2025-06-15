@@ -1,0 +1,228 @@
+{
+  "timestamp": "2025-06-11T19:51:24.945662",
+  "total_issues": 35,
+  "issues_by_category": {
+    "missing_handlers": [],
+    "broken_imports": [],
+    "incorrect_connections": [],
+    "outdated_components": [],
+    "missing_files": [],
+    "websocket_issues": [],
+    "api_endpoint_issues": [
+      {
+        "request_id": 55,
+        "issue": "Backend handler not used by frontend",
+        "severity": "low",
+        "description": "Manager Shifts inserting Request handling"
+      },
+      {
+        "request_id": 80,
+        "issue": "Backend handler not used by frontend",
+        "severity": "low",
+        "description": "Make new week shifts (original ID 80)"
+      },
+      {
+        "request_id": 81,
+        "issue": "Backend handler not used by frontend",
+        "severity": "low",
+        "description": "Manager creates new shift board"
+      },
+      {
+        "request_id": 82,
+        "issue": "Backend handler not used by frontend",
+        "severity": "low",
+        "description": "Manager saves shift board content"
+      },
+      {
+        "request_id": 83,
+        "issue": "Backend handler not used by frontend",
+        "severity": "low",
+        "description": "Manager resets shift board content"
+      },
+      {
+        "request_id": 84,
+        "issue": "Backend handler not used by frontend",
+        "severity": "low",
+        "description": "Manager publishes shift board"
+      },
+      {
+        "request_id": 85,
+        "issue": "Backend handler not used by frontend",
+        "severity": "low",
+        "description": "Manager unpublishes shift board"
+      },
+      {
+        "request_id": 1014,
+        "issue": "Backend handler not used by frontend",
+        "severity": "low",
+        "description": "Get employee timesheet history"
+      },
+      {
+        "request_id": 2001,
+        "issue": "Backend handler not used by frontend",
+        "severity": "low",
+        "description": "Get schedule data"
+      },
+      {
+        "request_id": 2002,
+        "issue": "Backend handler not used by frontend",
+        "severity": "low",
+        "description": "Assign worker to shift (enhanced)"
+      },
+      {
+        "request_id": 2003,
+        "issue": "Backend handler not used by frontend",
+        "severity": "low",
+        "description": "Unassign worker from shift (enhanced)"
+      },
+      {
+        "request_id": 1101,
+        "issue": "Backend handler not used by frontend",
+        "severity": "low",
+        "description": "Update User Management Settings"
+      },
+      {
+        "request_id": 1102,
+        "issue": "Backend handler not used by frontend",
+        "severity": "low",
+        "description": "Update Certifications Settings"
+      },
+      {
+        "request_id": 1103,
+        "issue": "Backend handler not used by frontend",
+        "severity": "low",
+        "description": "Update Client Management Settings"
+      },
+      {
+        "request_id": 1104,
+        "issue": "Backend handler not used by frontend",
+        "severity": "low",
+        "description": "Update Job Configuration Settings"
+      },
+      {
+        "request_id": 1105,
+        "issue": "Backend handler not used by frontend",
+        "severity": "low",
+        "description": "Update Advanced Timesheet Settings"
+      },
+      {
+        "request_id": 1106,
+        "issue": "Backend handler not used by frontend",
+        "severity": "low",
+        "description": "Update Google Integration Settings"
+      },
+      {
+        "request_id": 1107,
+        "issue": "Backend handler not used by frontend",
+        "severity": "low",
+        "description": "Update Reporting Settings"
+      },
+      {
+        "request_id": 1108,
+        "issue": "Backend handler not used by frontend",
+        "severity": "low",
+        "description": "Update Security Settings"
+      },
+      {
+        "request_id": 1109,
+        "issue": "Backend handler not used by frontend",
+        "severity": "low",
+        "description": "Update Mobile Accessibility Settings"
+      },
+      {
+        "request_id": 1110,
+        "issue": "Backend handler not used by frontend",
+        "severity": "low",
+        "description": "Update System Admin Settings"
+      },
+      {
+        "request_id": 1112,
+        "issue": "Backend handler not used by frontend",
+        "severity": "low",
+        "description": "Reset Extended Settings to Defaults"
+      },
+      {
+        "request_id": 1113,
+        "issue": "Backend handler not used by frontend",
+        "severity": "low",
+        "description": "Test Google Connection"
+      },
+      {
+        "request_id": 1114,
+        "issue": "Backend handler not used by frontend",
+        "severity": "low",
+        "description": "Manual Google Sync"
+      },
+      {
+        "request_id": 1115,
+        "issue": "Backend handler not used by frontend",
+        "severity": "low",
+        "description": "System Health Check"
+      },
+      {
+        "request_id": 1116,
+        "issue": "Backend handler not used by frontend",
+        "severity": "low",
+        "description": "Manual Backup"
+      },
+      {
+        "request_id": 1117,
+        "issue": "Backend handler not used by frontend",
+        "severity": "low",
+        "description": "Get Settings Summary"
+      },
+      {
+        "request_id": 1118,
+        "issue": "Backend handler not used by frontend",
+        "severity": "low",
+        "description": "Bulk Update Settings"
+      },
+      {
+        "request_id": 1119,
+        "issue": "Backend handler not used by frontend",
+        "severity": "low",
+        "description": "Export Settings Backup"
+      },
+      {
+        "request_id": 1120,
+        "issue": "Backend handler not used by frontend",
+        "severity": "low",
+        "description": "Import Settings Backup"
+      },
+      {
+        "request_id": 1121,
+        "issue": "Backend handler not used by frontend",
+        "severity": "low",
+        "description": "Get Settings Templates"
+      },
+      {
+        "request_id": 1122,
+        "issue": "Backend handler not used by frontend",
+        "severity": "low",
+        "description": "Apply Settings Template"
+      },
+      {
+        "request_id": 1123,
+        "issue": "Backend handler not used by frontend",
+        "severity": "low",
+        "description": "Compare Settings"
+      },
+      {
+        "request_id": 1124,
+        "issue": "Backend handler not used by frontend",
+        "severity": "low",
+        "description": "Validate Settings Bulk"
+      }
+    ],
+    "database_issues": [
+      {
+        "file": "handlers\\manager_schedule.py",
+        "issue": "Low error handling coverage: 23.1%",
+        "severity": "medium",
+        "functions": 13,
+        "try_blocks": 3
+      }
+    ],
+    "frontend_issues": []
+  }
+}

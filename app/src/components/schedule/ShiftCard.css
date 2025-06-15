@@ -1,0 +1,333 @@
+.shift-card {
+  background: white;
+  border: 1px solid #e9ecef;
+  border-radius: 6px;
+  padding: 8px;
+  margin: 2px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.shift-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.shift-card.compact {
+  padding: 6px;
+  font-size: 0.9em;
+}
+
+/* Status-based styling */
+.shift-card.no-workers {
+  border-left: 4px solid #e74c3c;
+  background: #fdf2f2;
+}
+
+.shift-card.understaffed {
+  border-left: 4px solid #f39c12;
+  background: #fef9e7;
+}
+
+.shift-card.fully-staffed {
+  border-left: 4px solid #27ae60;
+  background: #f0f9f0;
+}
+
+.shift-card.overstaffed {
+  border-left: 4px solid #3498db;
+  background: #f0f8ff;
+}
+
+.shift-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.shift-time {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.8em;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.start-time,
+.end-time {
+  color: #2c3e50;
+}
+
+.time-separator {
+  color: #7f8c8d;
+  margin: 0 2px;
+}
+
+.duration {
+  color: #7f8c8d;
+  font-weight: 500;
+  margin-left: 4px;
+}
+
+.legacy-time {
+  color: #7f8c8d;
+  font-style: italic;
+}
+
+.staffing-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.staffing-count {
+  font-size: 0.8em;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.status-dot.no-workers {
+  background: #e74c3c;
+}
+
+.status-dot.understaffed {
+  background: #f39c12;
+}
+
+.status-dot.fully-staffed {
+  background: #27ae60;
+}
+
+.status-dot.overstaffed {
+  background: #3498db;
+}
+
+.shift-content {
+  margin-bottom: 8px;
+}
+
+.job-info {
+  margin-bottom: 6px;
+}
+
+.job-name {
+  font-weight: 600;
+  color: #2c3e50;
+  font-size: 0.9em;
+  margin-bottom: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.client-name {
+  font-size: 0.8em;
+  color: #7f8c8d;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.role-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 6px;
+}
+
+.role-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.7em;
+}
+
+.role-name {
+  color: #7f8c8d;
+  font-weight: 500;
+}
+
+.role-count {
+  font-weight: 600;
+  padding: 1px 4px;
+  border-radius: 3px;
+  background: #f8f9fa;
+}
+
+.role-count.understaffed {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.role-count.overstaffed {
+  background: #cce5ff;
+  color: #004085;
+}
+
+.role-count.adequate {
+  background: #d4edda;
+  color: #155724;
+}
+
+.assigned-workers {
+  margin-bottom: 6px;
+}
+
+.worker-count {
+  font-size: 0.7em;
+  color: #7f8c8d;
+  font-weight: 500;
+}
+
+.worker-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.worker-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.7em;
+  padding: 1px 0;
+}
+
+.worker-name {
+  color: #2c3e50;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.worker-role {
+  color: #7f8c8d;
+  font-size: 0.6em;
+  margin-left: 4px;
+}
+
+.more-workers {
+  font-size: 0.7em;
+  color: #7f8c8d;
+  font-style: italic;
+  text-align: center;
+  padding: 2px 0;
+}
+
+.shift-footer {
+  border-top: 1px solid #f0f0f0;
+  padding-top: 6px;
+}
+
+.shift-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.po-number {
+  font-size: 0.7em;
+  color: #7f8c8d;
+  font-weight: 500;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 4px;
+}
+
+.timesheet-button {
+  background: #3498db;
+  color: white;
+  border: none;
+  padding: 4px 6px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 0.8em;
+  transition: all 0.2s ease;
+}
+
+.timesheet-button:hover {
+  background: #2980b9;
+}
+
+/* Compact mode adjustments */
+.shift-card.compact .shift-header {
+  margin-bottom: 4px;
+}
+
+.shift-card.compact .shift-content {
+  margin-bottom: 4px;
+}
+
+.shift-card.compact .role-breakdown {
+  display: none;
+}
+
+.shift-card.compact .worker-list {
+  display: none;
+}
+
+.shift-card.compact .shift-footer {
+  padding-top: 4px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .shift-card {
+    padding: 6px;
+    font-size: 0.9em;
+  }
+  
+  .shift-time {
+    font-size: 0.7em;
+  }
+  
+  .job-name {
+    font-size: 0.8em;
+  }
+  
+  .client-name {
+    font-size: 0.7em;
+  }
+  
+  .role-breakdown {
+    display: none;
+  }
+  
+  .worker-item {
+    font-size: 0.6em;
+  }
+}
+
+/* Print styles */
+@media print {
+  .shift-card {
+    box-shadow: none;
+    border: 1px solid #ddd;
+    break-inside: avoid;
+  }
+  
+  .shift-card:hover {
+    transform: none;
+    box-shadow: none;
+  }
+  
+  .action-buttons {
+    display: none;
+  }
+}

@@ -1,0 +1,27 @@
+.schedule-board {
+    width: 60%;
+    background: #dbf8ff;
+    border-radius: 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.schedule-board thead {
+    background: steelblue;
+    color: #fff;
+}
+
+.schedule-board th {
+    padding: 20px;
+    position: relative;
+}
+
+.schedule-board th span {
+    font-size: 12px;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+
+

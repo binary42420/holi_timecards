@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Connection Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .connecting { background-color: #fff3cd; color: #856404; }
+        .connected { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+        .log {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 10px;
+            margin: 10px 0;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 EasyShifts WebSocket Connection Test</h1>
+        
+        <div id="status" class="status connecting">🔌 Ready to connect...</div>
+        
+        <div>
+            <label for="wsUrl">WebSocket URL:</label>
+            <input type="text" id="wsUrl" value="wss://easyshifts-backend-794306818447.us-central1.run.app/ws">
+        </div>
+        
+        <div>
+            <button id="connectBtn" onclick="connectWebSocket()">Connect</button>
+            <button id="disconnectBtn" onclick="disconnectWebSocket()" disabled>Disconnect</button>
+            <button id="testLoginBtn" onclick="testLogin()" disabled>Test Login</button>
+            <button id="clearLogBtn" onclick="clearLog()">Clear Log</button>
+        </div>
+        
+        <div>
+            <h3>Login Test</h3>
+            <input type="text" id="username" placeholder="Username" value="admin">
+            <input type="password" id="password" placeholder="Password" value="Hdfatboy1!">
+        </div>
+        
+        <div id="log" class="log"></div>
+    </div>
+
+    <script>
+        let websocket = null;
+        let requestId = 1;
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logElement = document.getElementById('log');
+            const color = type === 'error' ? 'red' : type === 'success' ? 'green' : 'black';
+            logElement.innerHTML += `<div style="color: ${color}">[${timestamp}] ${message}</div>`;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+
+        function updateStatus(message, className) {
+            const statusElement = document.getElementById('status');
+            statusElement.textContent = message;
+            statusElement.className = `status ${className}`;
+        }
+
+        function updateButtons(connected) {
+            document.getElementById('connectBtn').disabled = connected;
+            document.getElementById('disconnectBtn').disabled = !connected;
+            document.getElementById('testLoginBtn').disabled = !connected;
+        }
+
+        function connectWebSocket() {
+            const url = document.getElementById('wsUrl').value;
+            
+            log(`🔌 Attempting to connect to: ${url}`);
+            updateStatus('🔌 Connecting...', 'connecting');
+            
+            try {
+                websocket = new WebSocket(url);
+                
+                websocket.onopen = function(event) {
+                    log('✅ WebSocket connection established', 'success');
+                    updateStatus('✅ Connected', 'connected');
+                    updateButtons(true);
+                };
+                
+                websocket.onmessage = function(event) {
+                    log(`📥 Received: ${event.data}`, 'success');
+                    
+                    try {
+                        const response = JSON.parse(event.data);
+                        if (response.request_id === 10) {
+                            if (response.data && response.data.user_exists) {
+                                log('🎉 Login successful!', 'success');
+                                log(`   User: ${response.data.user_data?.username}`, 'success');
+                                log(`   Manager: ${response.data.is_manager}`, 'success');
+                                log(`   Admin: ${response.data.is_admin}`, 'success');
+                            } else {
+                                log('❌ Login failed: ' + (response.data?.error || 'Unknown error'), 'error');
+                            }
+                        }
+                    } catch (e) {
+                        log('⚠️ Could not parse response as JSON', 'error');
+                    }
+                };
+                
+                websocket.onerror = function(error) {
+                    log(`❌ WebSocket error: ${error}`, 'error');
+                    updateStatus('❌ Connection Error', 'error');
+                    updateButtons(false);
+                };
+                
+                websocket.onclose = function(event) {
+                    log(`🔌 WebSocket closed: Code ${event.code}, Reason: ${event.reason}`, 'error');
+                    updateStatus('🔌 Disconnected', 'error');
+                    updateButtons(false);
+                    websocket = null;
+                };
+                
+            } catch (error) {
+                log(`❌ Failed to create WebSocket: ${error}`, 'error');
+                updateStatus('❌ Connection Failed', 'error');
+                updateButtons(false);
+            }
+        }
+
+        function disconnectWebSocket() {
+            if (websocket) {
+                websocket.close();
+                log('🔌 Disconnecting WebSocket');
+            }
+        }
+
+        function testLogin() {
+            if (!websocket || websocket.readyState !== WebSocket.OPEN) {
+                log('❌ WebSocket not connected', 'error');
+                return;
+            }
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            const loginRequest = {
+                request_id: 10,
+                data: {
+                    username: username,
+                    password: password
+                }
+            };
+            
+            log(`📤 Sending login request for user: ${username}`);
+            websocket.send(JSON.stringify(loginRequest));
+        }
+
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+        }
+
+        // Auto-connect on page load
+        window.onload = function() {
+            log('🚀 WebSocket test page loaded');
+            log('Click "Connect" to test the WebSocket connection');
+        };
+    </script>
+</body>
+</html>

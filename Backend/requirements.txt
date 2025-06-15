@@ -1,0 +1,15 @@
+sqlalchemy
+pymysql
+websockets
+cryptography
+google-auth
+google-auth-oauthlib
+google-auth-httplib2
+python-dotenv
+aiohttp
+aiohttp-cors
+requests
+redis
+aioredis
+hiredis
+bcrypt

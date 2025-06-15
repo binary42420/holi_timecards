@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Session Flow</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .log { background: #f5f5f5; padding: 10px; margin: 10px 0; border-radius: 4px; }
+        .success { color: green; }
+        .error { color: red; }
+        .info { color: blue; }
+        .warning { color: orange; }
+        button { padding: 10px 20px; margin: 5px; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 4px; font-weight: bold; }
+        .connected { background: #d4edda; color: #155724; }
+        .disconnected { background: #f8d7da; color: #721c24; }
+        .session-data { background: #e2e3e5; padding: 10px; border-radius: 4px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Debug Session Flow</h1>
+    
+    <div id="status" class="status disconnected">Disconnected</div>
+    
+    <div>
+        <button onclick="connect()">Connect WebSocket</button>
+        <button onclick="checkSessionData()">Check Session Data</button>
+        <button onclick="testGoogleSession()">Test Google Session</button>
+        <button onclick="testJobsRequest()">Test Jobs Request</button>
+        <button onclick="clearLogs()">Clear Logs</button>
+    </div>
+    
+    <div id="session-info" class="session-data">
+        <strong>Session Data:</strong> <span id="session-display">Not checked</span>
+    </div>
+    
+    <div id="logs"></div>
+    
+    <script>
+        const BACKEND_URL = 'wss://holi-timesheets-backend-2ma525uu2a-uc.a.run.app/ws';
+        let socket = null;
+        let sessionData = null;
+        
+        function log(message, type = 'info') {
+            const logs = document.getElementById('logs');
+            const logDiv = document.createElement('div');
+            logDiv.className = `log ${type}`;
+            logDiv.innerHTML = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logs.appendChild(logDiv);
+            logs.scrollTop = logs.scrollHeight;
+            console.log(message);
+        }
+        
+        function updateStatus(connected) {
+            const status = document.getElementById('status');
+            if (connected) {
+                status.textContent = 'Connected';
+                status.className = 'status connected';
+            } else {
+                status.textContent = 'Disconnected';
+                status.className = 'status disconnected';
+            }
+        }
+        
+        function updateSessionDisplay() {
+            const sessionDisplay = document.getElementById('session-display');
+            const storedSession = sessionStorage.getItem('holi_session');
+            const storedUser = localStorage.getItem('holi_user');
+            
+            if (storedSession) {
+                try {
+                    const parsed = JSON.parse(storedSession);
+                    sessionDisplay.innerHTML = `
+                        <strong>SessionStorage:</strong><br>
+                        Session ID: ${parsed.sessionId ? parsed.sessionId.substring(0, 20) + '...' : 'None'}<br>
+                        CSRF Token: ${parsed.csrfToken ? parsed.csrfToken.substring(0, 20) + '...' : 'None'}
+                    `;
+                } catch (e) {
+                    sessionDisplay.innerHTML = '<span style="color: red;">Invalid session data in sessionStorage</span>';
+                }
+            } else {
+                sessionDisplay.innerHTML = '<span style="color: red;">No session data in sessionStorage</span>';
+            }
+            
+            if (storedUser) {
+                try {
+                    const userParsed = JSON.parse(storedUser);
+                    sessionDisplay.innerHTML += `<br><br><strong>LocalStorage User:</strong><br>
+                        Username: ${userParsed.username || 'None'}<br>
+                        Is Manager: ${userParsed.isManager || 'false'}`;
+                } catch (e) {
+                    sessionDisplay.innerHTML += '<br><span style="color: red;">Invalid user data in localStorage</span>';
+                }
+            } else {
+                sessionDisplay.innerHTML += '<br><span style="color: red;">No user data in localStorage</span>';
+            }
+        }
+        
+        function clearLogs() {
+            document.getElementById('logs').innerHTML = '';
+        }
+        
+        function checkSessionData() {
+            log('🔍 Checking browser session data...', 'info');
+            updateSessionDisplay();
+            
+            const storedSession = sessionStorage.getItem('holi_session');
+            const storedUser = localStorage.getItem('holi_user');
+            
+            if (storedSession) {
+                try {
+                    const parsed = JSON.parse(storedSession);
+                    log(`✅ Found session data: Session ID ${parsed.sessionId ? 'present' : 'missing'}, CSRF Token ${parsed.csrfToken ? 'present' : 'missing'}`, 'success');
+                    sessionData = parsed;
+                } catch (e) {
+                    log(`❌ Invalid session data in sessionStorage: ${e.message}`, 'error');
+                }
+            } else {
+                log('❌ No session data found in sessionStorage', 'error');
+            }
+            
+            if (storedUser) {
+                try {
+                    const userParsed = JSON.parse(storedUser);
+                    log(`✅ Found user data: ${userParsed.username} (Manager: ${userParsed.isManager})`, 'success');
+                } catch (e) {
+                    log(`❌ Invalid user data in localStorage: ${e.message}`, 'error');
+                }
+            } else {
+                log('❌ No user data found in localStorage', 'error');
+            }
+        }
+        
+        function connect() {
+            log('🔌 Connecting to WebSocket...', 'info');
+            
+            if (socket && socket.readyState === WebSocket.OPEN) {
+                socket.close();
+            }
+            
+            socket = new WebSocket(BACKEND_URL);
+            
+            socket.onopen = function() {
+                log('✅ WebSocket connected successfully', 'success');
+                updateStatus(true);
+            };
+            
+            socket.onmessage = function(event) {
+                try {
+                    const response = JSON.parse(event.data);
+                    log(`📥 Received response: ${JSON.stringify(response, null, 2)}`, 'info');
+                    
+                    // Handle Google session creation response
+                    if (response.request_id === 69) {
+                        if (response.data && response.data.success) {
+                            sessionData = {
+                                sessionId: response.data.sessionId,
+                                csrfToken: response.data.csrfToken
+                            };
+                            
+                            // Store in sessionStorage like the real app does
+                            sessionStorage.setItem('holi_session', JSON.stringify(sessionData));
+                            
+                            log('✅ Google session created and stored successfully!', 'success');
+                            log(`Session ID: ${sessionData.sessionId.substring(0, 20)}...`, 'info');
+                            updateSessionDisplay();
+                        } else {
+                            log(`❌ Google session creation failed: ${response.data ? response.data.error : 'Unknown error'}`, 'error');
+                            if (response.data && response.data.debug_info) {
+                                log(`Debug info: ${JSON.stringify(response.data.debug_info, null, 2)}`, 'warning');
+                            }
+                        }
+                    }
+                    
+                    // Handle jobs request response
+                    if (response.request_id === 211) {
+                        if (response.success) {
+                            log(`✅ Jobs request successful! Found ${response.data ? response.data.length : 0} jobs`, 'success');
+                        } else {
+                            log(`❌ Jobs request failed: ${response.error}`, 'error');
+                        }
+                    }
+                } catch (e) {
+                    log(`❌ Error parsing response: ${e.message}`, 'error');
+                }
+            };
+            
+            socket.onerror = function(error) {
+                log(`❌ WebSocket error: ${error}`, 'error');
+                updateStatus(false);
+            };
+            
+            socket.onclose = function(event) {
+                log(`🔌 WebSocket closed: ${event.code} ${event.reason}`, 'info');
+                updateStatus(false);
+            };
+        }
+        
+        function testGoogleSession() {
+            if (!socket || socket.readyState !== WebSocket.OPEN) {
+                log('❌ WebSocket not connected. Connect first.', 'error');
+                return;
+            }
+            
+            log('🔐 Testing Google session creation...', 'info');
+            
+            const googleUserData = {
+                username: 'admin',
+                email: 'admin@example.com',
+                googleId: 'test_google_id_123',
+                isManager: true
+            };
+            
+            const request = {
+                request_id: 69, // GOOGLE_SESSION_CREATE
+                data: googleUserData
+            };
+            
+            log(`📤 Sending Google session create request...`, 'info');
+            log(`Data: ${JSON.stringify(googleUserData, null, 2)}`, 'info');
+            socket.send(JSON.stringify(request));
+        }
+        
+        function testJobsRequest() {
+            if (!socket || socket.readyState !== WebSocket.OPEN) {
+                log('❌ WebSocket not connected. Connect first.', 'error');
+                return;
+            }
+            
+            // Check session data first
+            checkSessionData();
+            
+            if (!sessionData) {
+                log('❌ No session data available. Create Google session first.', 'error');
+                return;
+            }
+            
+            log('💼 Testing jobs request with session authentication...', 'info');
+            
+            const request = {
+                request_id: 211, // GET_JOBS_BY_MANAGER
+                data: {},
+                session_id: sessionData.sessionId,
+                csrf_token: sessionData.csrfToken
+            };
+            
+            log(`📤 Sending authenticated jobs request...`, 'info');
+            log(`Session ID: ${sessionData.sessionId.substring(0, 20)}...`, 'info');
+            log(`CSRF Token: ${sessionData.csrfToken.substring(0, 20)}...`, 'info');
+            socket.send(JSON.stringify(request));
+        }
+        
+        // Auto-check session data on page load
+        window.onload = function() {
+            log('🚀 Session Debug Tool loaded', 'info');
+            checkSessionData();
+            log('Click "Connect WebSocket" to start testing', 'info');
+        };
+    </script>
+</body>
+</html>

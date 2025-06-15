@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Quick Main App Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .instructions { background: #e7f3ff; padding: 15px; border-radius: 4px; margin: 10px 0; }
+        .success { color: green; }
+        .error { color: red; }
+        .info { color: blue; }
+        button { padding: 10px 20px; margin: 5px; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Quick Main App Test</h1>
+    
+    <div class="instructions">
+        <h3>🎯 Testing Instructions for Main App</h3>
+        <p>Since the debug tools show everything is working, let's test the main application with a specific approach:</p>
+    </div>
+    
+    <div>
+        <button onclick="openMainApp()">🚀 Open Main App</button>
+        <button onclick="showTestSteps()">📋 Show Test Steps</button>
+    </div>
+    
+    <div id="test-steps" style="display: none;">
+        <h3>📝 Step-by-Step Test Process:</h3>
+        <ol>
+            <li><strong>Clear Browser Data:</strong>
+                <ul>
+                    <li>Press F12 to open Developer Tools</li>
+                    <li>Go to Application tab</li>
+                    <li>Clear Storage: localStorage, sessionStorage, cookies</li>
+                    <li>Close Developer Tools</li>
+                </ul>
+            </li>
+            
+            <li><strong>Hard Refresh:</strong>
+                <ul>
+                    <li>Press Ctrl+Shift+R (or Cmd+Shift+R on Mac)</li>
+                    <li>Wait for page to fully load</li>
+                </ul>
+            </li>
+            
+            <li><strong>Test Google Login:</strong>
+                <ul>
+                    <li>Click "Sign in with Google"</li>
+                    <li>Complete Google authentication</li>
+                    <li>Wait for login to complete (should not timeout)</li>
+                </ul>
+            </li>
+            
+            <li><strong>Navigate to Manager Jobs:</strong>
+                <ul>
+                    <li>Look for navigation menu</li>
+                    <li>Click on "Manager Jobs" or similar</li>
+                    <li>Should show "Connected" and load job data</li>
+                </ul>
+            </li>
+            
+            <li><strong>Check for Success:</strong>
+                <ul>
+                    <li>✅ "Connected" status at top</li>
+                    <li>✅ Job data loads (should see 12 jobs)</li>
+                    <li>✅ No "User session not found" errors</li>
+                </ul>
+            </li>
+        </ol>
+        
+        <h3>🔧 If Issues Persist:</h3>
+        <ul>
+            <li><strong>Check Browser Console:</strong> Look for any remaining errors</li>
+            <li><strong>Try Different Browser:</strong> Test in incognito/private mode</li>
+            <li><strong>Check Network Tab:</strong> Verify WebSocket connection is stable</li>
+        </ul>
+        
+        <h3>📊 Expected Results:</h3>
+        <p>Based on our debug tests, you should see:</p>
+        <ul>
+            <li>✅ Google OAuth completes successfully</li>
+            <li>✅ Session created with valid sessionId and csrfToken</li>
+            <li>✅ Manager jobs page loads 12 jobs including:</li>
+            <ul>
+                <li>test job</li>
+                <li>Corporate Event Setup</li>
+                <li>Concert Setup - Downtown Arena</li>
+                <li>Comic-Con Booth Setup</li>
+                <li>crssd events</li>
+            </ul>
+        </ul>
+    </div>
+    
+    <script>
+        function openMainApp() {
+            window.open('https://holi-timesheets-frontend-2ma525uu2a-uc.a.run.app', '_blank');
+            showTestSteps();
+        }
+        
+        function showTestSteps() {
+            document.getElementById('test-steps').style.display = 'block';
+        }
+        
+        // Auto-show instructions
+        window.onload = function() {
+            console.log('Quick Main App Test loaded');
+        };
+    </script>
+</body>
+</html>

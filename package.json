@@ -1,0 +1,11 @@
+{
+  "name": "holi-timesheets",
+  "version": "1.0.0",
+  "description": "HOLI Timesheets - Hands on Labor Integrated Timesheets System",
+  "dependencies": {
+    "redis-cli": "^2.1.2",
+    "update": "^0.7.4",
+    "upgrade": "^1.1.0",
+    "ws": "^8.18.2"
+  }
+}

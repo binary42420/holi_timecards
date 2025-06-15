@@ -1,0 +1,220 @@
+.shift-details-header {
+  margin-bottom: 30px;
+}
+
+.shift-info-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 30px;
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  color: white;
+}
+
+.card-header h2 {
+  margin: 0;
+  font-size: 1.5em;
+  font-weight: 600;
+}
+
+.shift-id {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 6px 15px;
+  border-radius: 20px;
+  font-weight: 500;
+  font-size: 0.9em;
+}
+
+.shift-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 0;
+}
+
+.info-section {
+  padding: 25px 30px;
+  border-right: 1px solid #f0f0f0;
+}
+
+.info-section:last-child {
+  border-right: none;
+}
+
+.info-section h3 {
+  margin: 0 0 15px 0;
+  color: #2c3e50;
+  font-size: 1.1em;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.info-items {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+}
+
+.info-item .label {
+  font-weight: 500;
+  color: #7f8c8d;
+  min-width: 80px;
+}
+
+.info-item .value {
+  font-weight: 600;
+  color: #2c3e50;
+  text-align: right;
+  flex: 1;
+}
+
+.access-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 15px;
+}
+
+.access-badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.8em;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.access-badge.manager {
+  background: #e74c3c;
+  color: white;
+}
+
+.access-badge.crew-chief {
+  background: #f39c12;
+  color: white;
+}
+
+.access-badge.client {
+  background: #9b59b6;
+  color: white;
+}
+
+.access-badge.employee {
+  background: #27ae60;
+  color: white;
+}
+
+.permissions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.permission-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  font-size: 0.9em;
+}
+
+.permission-icon {
+  font-size: 1.1em;
+  width: 20px;
+  text-align: center;
+}
+
+.permission-item span:last-child {
+  color: #7f8c8d;
+  font-weight: 500;
+}
+
+/* Responsive design */
+@media (max-width: 1024px) {
+  .shift-info-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .info-section {
+    border-right: none;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  
+  .info-section:last-child {
+    border-bottom: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 20px;
+  }
+  
+  .card-header h2 {
+    font-size: 1.3em;
+  }
+  
+  .shift-id {
+    align-self: flex-end;
+  }
+  
+  .info-section {
+    padding: 20px;
+  }
+  
+  .info-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  
+  .info-item .value {
+    text-align: left;
+  }
+  
+  .access-badges {
+    justify-content: flex-start;
+  }
+}
+
+/* Print styles */
+@media print {
+  .shift-info-card {
+    box-shadow: none;
+    border: 1px solid #ddd;
+  }
+  
+  .card-header {
+    background: #f8f9fa !important;
+    color: #2c3e50 !important;
+    border-bottom: 2px solid #ddd;
+  }
+  
+  .shift-id {
+    background: #e9ecef !important;
+    color: #495057 !important;
+  }
+  
+  .access-badge {
+    background: #e9ecef !important;
+    color: #495057 !important;
+  }
+}

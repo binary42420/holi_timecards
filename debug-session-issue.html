@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Session Issue - HOLI Timesheets</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 10px 0;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .success { color: #28a745; }
+        .error { color: #dc3545; }
+        .warning { color: #ffc107; }
+        .info { color: #17a2b8; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .status.connected { background: #d4edda; color: #155724; }
+        .status.disconnected { background: #f8d7da; color: #721c24; }
+        .status.connecting { background: #fff3cd; color: #856404; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Debug Session Issue - HOLI Timesheets</h1>
+    
+    <div class="container">
+        <h2>Connection Status</h2>
+        <div id="connectionStatus" class="status disconnected">Disconnected</div>
+        <button onclick="connectWebSocket()">Connect WebSocket</button>
+        <button onclick="disconnectWebSocket()">Disconnect</button>
+    </div>
+
+    <div class="container">
+        <h2>Session Information</h2>
+        <div id="sessionInfo" class="log">No session data</div>
+        <button onclick="checkSessionData()">Check Session Data</button>
+        <button onclick="clearSessionData()">Clear Session Data</button>
+    </div>
+
+    <div class="container">
+        <h2>Test Requests</h2>
+        <button onclick="testGoogleSessionCreate()">Test Google Session Create</button>
+        <button onclick="testClientCompaniesRequest()">Test Client Companies (200)</button>
+        <button onclick="testJobsRequest()">Test Jobs by Manager (211)</button>
+        <button onclick="testEmployeeDirectory()">Test Employee Directory (60)</button>
+    </div>
+
+    <div class="container">
+        <h2>Debug Log</h2>
+        <div id="debugLog" class="log">Debug log will appear here...</div>
+        <button onclick="clearLog()">Clear Log</button>
+    </div>
+
+    <script>
+        let ws = null;
+        let messageHandlers = new Map();
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toISOString();
+            const logElement = document.getElementById('debugLog');
+            const colorClass = type === 'error' ? 'error' : type === 'success' ? 'success' : type === 'warning' ? 'warning' : 'info';
+            logElement.innerHTML += `<span class="${colorClass}">[${timestamp}] ${message}</span>\n`;
+            logElement.scrollTop = logElement.scrollHeight;
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+
+        function updateConnectionStatus(status) {
+            const statusElement = document.getElementById('connectionStatus');
+            statusElement.textContent = status;
+            statusElement.className = `status ${status.toLowerCase().replace(' ', '')}`;
+        }
+
+        function connectWebSocket() {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                log('WebSocket already connected', 'warning');
+                return;
+            }
+
+            const wsUrl = 'wss://holi-timesheets-backend-2ma525uu2a-uc.a.run.app/ws';
+            log(`Connecting to: ${wsUrl}`, 'info');
+            
+            ws = new WebSocket(wsUrl);
+            updateConnectionStatus('Connecting');
+
+            ws.onopen = function() {
+                log('✅ WebSocket connected successfully', 'success');
+                updateConnectionStatus('Connected');
+            };
+
+            ws.onmessage = function(event) {
+                try {
+                    const response = JSON.parse(event.data);
+                    log(`📨 Received: ${JSON.stringify(response, null, 2)}`, 'info');
+                    
+                    // Handle specific responses
+                    if (response.request_id) {
+                        const handler = messageHandlers.get(response.request_id);
+                        if (handler) {
+                            handler(response);
+                            messageHandlers.delete(response.request_id);
+                        }
+                    }
+                } catch (error) {
+                    log(`❌ Error parsing message: ${error.message}`, 'error');
+                }
+            };
+
+            ws.onclose = function(event) {
+                log(`🔌 WebSocket closed: ${event.code} - ${event.reason}`, 'warning');
+                updateConnectionStatus('Disconnected');
+            };
+
+            ws.onerror = function(error) {
+                log(`❌ WebSocket error: ${error}`, 'error');
+                updateConnectionStatus('Error');
+            };
+        }
+
+        function disconnectWebSocket() {
+            if (ws) {
+                ws.close();
+                ws = null;
+            }
+        }
+
+        function checkSessionData() {
+            const sessionData = sessionStorage.getItem('holi_session');
+            const userData = localStorage.getItem('holi_user');
+            
+            const sessionInfo = document.getElementById('sessionInfo');
+            let info = 'Session Storage:\n';
+            
+            if (sessionData) {
+                try {
+                    const parsed = JSON.parse(sessionData);
+                    info += `✅ Session Data: ${JSON.stringify(parsed, null, 2)}\n`;
+                } catch (e) {
+                    info += `❌ Invalid session data: ${sessionData}\n`;
+                }
+            } else {
+                info += '❌ No session data found\n';
+            }
+            
+            info += '\nLocal Storage:\n';
+            if (userData) {
+                try {
+                    const parsed = JSON.parse(userData);
+                    info += `✅ User Data: ${JSON.stringify(parsed, null, 2)}\n`;
+                } catch (e) {
+                    info += `❌ Invalid user data: ${userData}\n`;
+                }
+            } else {
+                info += '❌ No user data found\n';
+            }
+            
+            sessionInfo.textContent = info;
+            log('Session data checked', 'info');
+        }
+
+        function clearSessionData() {
+            sessionStorage.removeItem('holi_session');
+            localStorage.removeItem('holi_user');
+            log('Session data cleared', 'warning');
+            checkSessionData();
+        }
+
+        function createAuthenticatedRequest(requestId, data = {}) {
+            const sessionData = sessionStorage.getItem('holi_session');
+            
+            const request = {
+                request_id: requestId,
+                data: data
+            };
+
+            if (sessionData) {
+                try {
+                    const parsed = JSON.parse(sessionData);
+                    request.session_id = parsed.sessionId;
+                    request.csrf_token = parsed.csrfToken;
+                    log(`🔐 Added session auth to request ${requestId}`, 'info');
+                } catch (e) {
+                    log(`❌ Failed to parse session data: ${e.message}`, 'error');
+                }
+            } else {
+                log(`⚠️ No session data for request ${requestId}`, 'warning');
+            }
+
+            return request;
+        }
+
+        function sendRequest(requestId, data = {}, description = '') {
+            if (!ws || ws.readyState !== WebSocket.OPEN) {
+                log('❌ WebSocket not connected', 'error');
+                return;
+            }
+
+            const request = createAuthenticatedRequest(requestId, data);
+            log(`📤 Sending ${description || `request ${requestId}`}: ${JSON.stringify(request, null, 2)}`, 'info');
+            
+            ws.send(JSON.stringify(request));
+        }
+
+        function testGoogleSessionCreate() {
+            // Simulate Google session creation
+            const userData = {
+                username: 'test@example.com',
+                email: 'test@example.com',
+                googleId: 'test123',
+                isManager: true
+            };
+            
+            sendRequest(69, userData, 'Google Session Create');
+            
+            messageHandlers.set(69, (response) => {
+                if (response.data && response.data.success) {
+                    log('✅ Google session created successfully', 'success');
+                    
+                    // Store session data
+                    if (response.data.sessionId && response.data.csrfToken) {
+                        const sessionData = {
+                            sessionId: response.data.sessionId,
+                            csrfToken: response.data.csrfToken
+                        };
+                        sessionStorage.setItem('holi_session', JSON.stringify(sessionData));
+                        log('💾 Session data stored', 'success');
+                        checkSessionData();
+                    }
+                } else {
+                    log(`❌ Google session creation failed: ${response.data?.error || 'Unknown error'}`, 'error');
+                }
+            });
+        }
+
+        function testClientCompaniesRequest() {
+            sendRequest(200, {}, 'Get All Client Companies');
+            
+            messageHandlers.set(200, (response) => {
+                if (response.success) {
+                    log(`✅ Client companies loaded: ${response.data?.length || 0} companies`, 'success');
+                } else {
+                    log(`❌ Client companies failed: ${response.error}`, 'error');
+                }
+            });
+        }
+
+        function testJobsRequest() {
+            sendRequest(211, {}, 'Get Jobs by Manager');
+            
+            messageHandlers.set(211, (response) => {
+                if (response.success) {
+                    log(`✅ Jobs loaded: ${response.data?.length || 0} jobs`, 'success');
+                } else {
+                    log(`❌ Jobs failed: ${response.error}`, 'error');
+                }
+            });
+        }
+
+        function testEmployeeDirectory() {
+            sendRequest(60, {}, 'Get Employee Directory');
+            
+            messageHandlers.set(60, (response) => {
+                if (response.success) {
+                    log(`✅ Employee directory loaded: ${response.data?.length || 0} employees`, 'success');
+                } else {
+                    log(`❌ Employee directory failed: ${response.error}`, 'error');
+                }
+            });
+        }
+
+        function clearLog() {
+            document.getElementById('debugLog').innerHTML = 'Debug log cleared...\n';
+        }
+
+        // Initialize
+        window.onload = function() {
+            log('🔍 Debug Session Issue Tool Loaded', 'info');
+            log('Backend URL: wss://holi-timesheets-backend-2ma525uu2a-uc.a.run.app/ws', 'info');
+            checkSessionData();
+        };
+    </script>
+</body>
+</html>

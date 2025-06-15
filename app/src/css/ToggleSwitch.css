@@ -1,0 +1,165 @@
+/* Toggle Switch Component Styles */
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+  user-select: none;
+}
+
+.toggle-switch.disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.toggle-input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+
+.toggle-slider {
+  position: relative;
+  display: block;
+  background: #ccc;
+  border-radius: 50px;
+  transition: all 0.3s ease;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.toggle-knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  background: white;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+/* Size variants */
+.toggle-switch.small .toggle-slider {
+  width: 36px;
+  height: 20px;
+}
+
+.toggle-switch.small .toggle-knob {
+  width: 16px;
+  height: 16px;
+}
+
+.toggle-switch.medium .toggle-slider {
+  width: 48px;
+  height: 26px;
+}
+
+.toggle-switch.medium .toggle-knob {
+  width: 22px;
+  height: 22px;
+}
+
+.toggle-switch.large .toggle-slider {
+  width: 60px;
+  height: 32px;
+}
+
+.toggle-switch.large .toggle-knob {
+  width: 28px;
+  height: 28px;
+}
+
+/* Checked state */
+.toggle-input:checked + .toggle-slider {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1), 0 0 10px rgba(102, 126, 234, 0.3);
+}
+
+.toggle-input:checked + .toggle-slider .toggle-knob {
+  transform: translateX(calc(100% + 2px));
+}
+
+.toggle-switch.small .toggle-input:checked + .toggle-slider .toggle-knob {
+  transform: translateX(16px);
+}
+
+.toggle-switch.medium .toggle-input:checked + .toggle-slider .toggle-knob {
+  transform: translateX(22px);
+}
+
+.toggle-switch.large .toggle-input:checked + .toggle-slider .toggle-knob {
+  transform: translateX(28px);
+}
+
+/* Focus state */
+.toggle-input:focus + .toggle-slider {
+  outline: 2px solid #667eea;
+  outline-offset: 2px;
+}
+
+/* Hover state */
+.toggle-switch:not(.disabled):hover .toggle-slider {
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1), 0 0 8px rgba(0, 0, 0, 0.1);
+}
+
+.toggle-switch:not(.disabled):hover .toggle-input:checked + .toggle-slider {
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1), 0 0 15px rgba(102, 126, 234, 0.4);
+}
+
+/* Active state */
+.toggle-switch:not(.disabled):active .toggle-knob {
+  transform: scale(0.95);
+}
+
+.toggle-switch:not(.disabled):active .toggle-input:checked + .toggle-slider .toggle-knob {
+  transform: translateX(calc(100% + 2px)) scale(0.95);
+}
+
+.toggle-switch.small:not(.disabled):active .toggle-input:checked + .toggle-slider .toggle-knob {
+  transform: translateX(16px) scale(0.95);
+}
+
+.toggle-switch.medium:not(.disabled):active .toggle-input:checked + .toggle-slider .toggle-knob {
+  transform: translateX(22px) scale(0.95);
+}
+
+.toggle-switch.large:not(.disabled):active .toggle-input:checked + .toggle-slider .toggle-knob {
+  transform: translateX(28px) scale(0.95);
+}
+
+/* Disabled state */
+.toggle-switch.disabled .toggle-slider {
+  background: #e9ecef;
+  cursor: not-allowed;
+}
+
+.toggle-switch.disabled .toggle-knob {
+  background: #f8f9fa;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.toggle-switch.disabled .toggle-input:checked + .toggle-slider {
+  background: #adb5bd;
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+  .toggle-slider,
+  .toggle-knob {
+    transition: none;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .toggle-slider {
+    border: 2px solid currentColor;
+  }
+  
+  .toggle-input:checked + .toggle-slider {
+    background: currentColor;
+  }
+  
+  .toggle-knob {
+    border: 1px solid currentColor;
+  }
+}

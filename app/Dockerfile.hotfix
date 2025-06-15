@@ -1,0 +1,12 @@
+# Quick hotfix Dockerfile to update env-config.js
+FROM gcr.io/holitimecards/holi-timesheets-frontend:latest
+
+# Copy the corrected env-config.js file
+COPY public/env-config.js /usr/share/nginx/html/env-config.js
+
+# Ensure proper permissions
+RUN chmod 644 /usr/share/nginx/html/env-config.js
+
+# The rest remains the same
+EXPOSE 8080
+CMD ["nginx", "-g", "daemon off;"]

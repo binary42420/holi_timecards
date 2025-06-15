@@ -1,0 +1,41 @@
+# Cloud Build configuration for EasyShifts Backend
+steps:
+  # Build the container image
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [
+      'build', 
+      '-t', 'us-central1-docker.pkg.dev/easyshifts/easyshifts-repo/easyshifts-backend:latest',
+      '.'
+    ]
+    dir: 'Backend'
+
+  # Push the container image to Artifact Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [
+      'push', 
+      'us-central1-docker.pkg.dev/easyshifts/easyshifts-repo/easyshifts-backend:latest'
+    ]
+
+  # Deploy to Cloud Run with environment variables
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'gcloud'
+    args: [
+      'run', 'deploy', 'easyshifts-backend',
+      '--image', 'us-central1-docker.pkg.dev/easyshifts/easyshifts-repo/easyshifts-backend:latest',
+      '--region', 'us-central1',
+      '--platform', 'managed',
+      '--allow-unauthenticated',
+      '--port', '8080',
+      '--memory', '1Gi',
+      '--cpu', '1',
+      '--max-instances', '10',
+      '--set-env-vars', 'DB_HOST=miano.h.filess.io,DB_PORT=3305,DB_USER=easyshiftsdb_danceshall,DB_NAME=easyshiftsdb_danceshall,DB_PASSWORD=a61d15d9b4f2671739338d1082cc7b75c0084e21,REDIS_HOST=redis-12649.c328.europe-west3-1.gce.redns.redis-cloud.com,REDIS_PORT=12649,REDIS_PASSWORD=AtpYvgs0JUs0KvuZm93yvTEzkXEg4fNa,REDIS_DB=0,REDIS_MAX_CONNECTIONS=20,REDIS_SOCKET_TIMEOUT=5,REDIS_CONNECT_TIMEOUT=5,SESSION_SECRET_KEY=K8mP9vN2xQ7wE5tR1yU6iO3pA8sD4fG9hJ2kL5nM7bV0cX1zQ6wE9rT3yU8iO5pA,CSRF_SECRET_KEY=X9mN2bV5cQ8wE1rT4yU7iO0pA3sD6fG2hJ5kL8nM1bV4cX7zQ0wE3rT6yU9iO2pA,SESSION_TIMEOUT_MINUTES=480,VALIDATE_SESSION_IP=false,PASSWORD_MIN_LENGTH=8,REQUIRE_PASSWORD_COMPLEXITY=true,HOST=0.0.0.0,PORT=8080,ENVIRONMENT=production,GOOGLE_CLIENT_ID=794306818447-4prnpg1p13a4smvnnfs7tfvkesrld9ms.apps.googleusercontent.com'
+    ]
+
+# Build options
+options:
+  logging: CLOUD_LOGGING_ONLY
+  machineType: 'E2_HIGHCPU_8'
+
+# Build timeout
+timeout: '1200s'

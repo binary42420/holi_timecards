@@ -1,0 +1,205 @@
+.shift-assignment-row {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  background: white;
+  margin-bottom: 12px;
+  transition: all 0.2s ease;
+}
+
+.shift-assignment-row:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.role-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.role-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.role-label {
+  font-weight: 600;
+  font-size: 1.1em;
+  color: #495057;
+}
+
+.status-badge {
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.85em;
+  font-weight: 600;
+  min-width: 50px;
+  text-align: center;
+}
+
+.assigned-workers {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.assigned-worker {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  border-left: 4px solid #28a745;
+}
+
+.worker-name {
+  font-weight: 500;
+  color: #495057;
+}
+
+.unassign-btn {
+  background: #dc3545;
+  color: white;
+  border: none;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 0.85em;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.unassign-btn:hover:not(:disabled) {
+  background: #c82333;
+}
+
+.unassign-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.assignment-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.assign-section {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+}
+
+.assign-section > div:first-child {
+  flex: 1;
+}
+
+.assign-btn {
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  white-space: nowrap;
+}
+
+.assign-btn:hover:not(:disabled) {
+  background: #218838;
+}
+
+.assign-btn:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+}
+
+.fully-staffed {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  background: #d4edda;
+  border: 1px solid #c3e6cb;
+  border-radius: 6px;
+}
+
+.status-text {
+  color: #155724;
+  font-weight: 600;
+  font-size: 0.95em;
+}
+
+/* Responsive design */
+@media (min-width: 768px) {
+  .shift-assignment-row {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 20px;
+  }
+  
+  .role-status {
+    flex: 0 0 200px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .assigned-workers {
+    flex: 1;
+    min-width: 0;
+  }
+  
+  .assignment-controls {
+    flex: 0 0 300px;
+  }
+  
+  .assign-section {
+    flex-direction: row;
+  }
+}
+
+@media (max-width: 767px) {
+  .shift-assignment-row {
+    padding: 12px;
+  }
+  
+  .role-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  
+  .assigned-worker {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  
+  .assign-section {
+    flex-direction: column;
+  }
+  
+  .assign-btn {
+    width: 100%;
+  }
+}
+
+/* Custom select option styling */
+.select-option-certified::before {
+  content: "✓ ";
+  color: #28a745;
+  font-weight: bold;
+}
+
+.select-option-not-certified::before {
+  content: "⚠ ";
+  color: #ffc107;
+  font-weight: bold;
+}

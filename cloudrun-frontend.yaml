@@ -1,0 +1,59 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: holi-timesheets-frontend
+  annotations:
+    run.googleapis.com/ingress: all
+    run.googleapis.com/execution-environment: gen2
+spec:
+  template:
+    metadata:
+      annotations:
+        run.googleapis.com/cpu-throttling: "false"
+        run.googleapis.com/execution-environment: gen2
+        run.googleapis.com/memory: "512Mi"
+        run.googleapis.com/cpu: "500m"
+    spec:
+      containerConcurrency: 100
+      timeoutSeconds: 800
+      containers:
+      - image: us-central1-docker.pkg.dev/holitimecards/holi-timesheets-repo/holi-timesheets-frontend:latest
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+        env:
+        - name: REACT_APP_GOOGLE_CLIENT_ID
+          value: "444854334434-fqapk7semoggrnj247bv8auqe4n32ldl.apps.googleusercontent.com"
+        - name: REACT_APP_API_URL
+          value: "wss://holi-timesheets-backend-2ma525uu2a-uc.a.run.app/ws"
+        - name: REACT_APP_ENV
+          value: "production"
+        resources:
+          limits:
+            cpu: 1000m
+            memory: 512Mi
+          requests:
+            cpu: 500m
+            memory: 256Mi
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 20
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 15
+  traffic:
+  - percent: 100
+    latestRevision: true
+
+
+
+
+

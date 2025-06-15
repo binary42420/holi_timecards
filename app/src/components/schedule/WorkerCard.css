@@ -1,0 +1,254 @@
+.worker-card {
+  background: white;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 12px;
+  cursor: grab;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.worker-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.worker-card:active {
+  cursor: grabbing;
+}
+
+.worker-card.unavailable {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: #f8f9fa;
+}
+
+.worker-card.unavailable:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.worker-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.worker-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.worker-icon {
+  font-size: 1.2em;
+}
+
+.worker-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.worker-name {
+  font-weight: 600;
+  color: #2c3e50;
+  font-size: 0.9em;
+  margin-bottom: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.worker-role {
+  font-size: 0.8em;
+  color: #7f8c8d;
+  font-weight: 500;
+}
+
+.worker-status {
+  flex-shrink: 0;
+}
+
+.status-indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid white;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
+}
+
+.status-indicator.available {
+  background: #27ae60;
+}
+
+.status-indicator.assigned {
+  background: #f39c12;
+}
+
+.status-indicator.unavailable {
+  background: #e74c3c;
+}
+
+.worker-details {
+  margin-bottom: 8px;
+}
+
+.availability-text {
+  font-size: 0.8em;
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+
+.certification-badges {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.cert-badge {
+  background: #3498db;
+  color: white;
+  padding: 2px 6px;
+  border-radius: 12px;
+  font-size: 0.7em;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.availability-score {
+  margin-bottom: 8px;
+}
+
+.score-bar {
+  width: 100%;
+  height: 4px;
+  background: #e9ecef;
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 4px;
+}
+
+.score-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #e74c3c 0%, #f39c12 50%, #27ae60 100%);
+  transition: width 0.3s ease;
+}
+
+.score-text {
+  font-size: 0.7em;
+  color: #7f8c8d;
+  font-weight: 500;
+}
+
+.worker-actions {
+  border-top: 1px solid #f0f0f0;
+  padding-top: 8px;
+}
+
+.drag-hint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 0.7em;
+  color: #7f8c8d;
+  font-weight: 500;
+}
+
+.drag-icon {
+  font-size: 0.9em;
+}
+
+.drag-text {
+  font-style: italic;
+}
+
+/* Drag states */
+.worker-card[draggable="true"]:hover .drag-hint {
+  color: #3498db;
+}
+
+.worker-card[draggable="true"]:active {
+  opacity: 0.8;
+  transform: rotate(2deg) scale(0.95);
+}
+
+/* Status-specific styling */
+.worker-card.available {
+  border-left: 4px solid #27ae60;
+}
+
+.worker-card.assigned {
+  border-left: 4px solid #f39c12;
+}
+
+.worker-card.unavailable {
+  border-left: 4px solid #e74c3c;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .worker-card {
+    padding: 10px;
+  }
+  
+  .worker-avatar {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .worker-icon {
+    font-size: 1.1em;
+  }
+  
+  .worker-name {
+    font-size: 0.85em;
+  }
+  
+  .worker-role {
+    font-size: 0.75em;
+  }
+  
+  .availability-text {
+    font-size: 0.75em;
+  }
+  
+  .cert-badge {
+    font-size: 0.65em;
+    padding: 1px 4px;
+  }
+  
+  .drag-hint {
+    font-size: 0.65em;
+  }
+  
+  .availability-score {
+    display: none;
+  }
+}
+
+/* Print styles */
+@media print {
+  .worker-card {
+    break-inside: avoid;
+    box-shadow: none;
+    border: 1px solid #ddd;
+  }
+  
+  .worker-card:hover {
+    transform: none;
+    box-shadow: none;
+  }
+  
+  .worker-actions {
+    display: none;
+  }
+}

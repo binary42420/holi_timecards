@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Final Authentication Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .log { background: #f5f5f5; padding: 10px; margin: 10px 0; border-radius: 4px; }
+        .success { color: green; }
+        .error { color: red; }
+        .info { color: blue; }
+        .warning { color: orange; }
+        button { padding: 10px 20px; margin: 5px; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 4px; font-weight: bold; }
+        .connected { background: #d4edda; color: #155724; }
+        .disconnected { background: #f8d7da; color: #721c24; }
+        .test-results { background: #e2e3e5; padding: 15px; border-radius: 4px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Final Authentication Test</h1>
+    
+    <div id="status" class="status disconnected">Disconnected</div>
+    
+    <div>
+        <button onclick="runFullTest()">🚀 Run Complete Authentication Test</button>
+        <button onclick="testManagerJobs()">💼 Test Manager Jobs Flow</button>
+        <button onclick="clearLogs()">Clear Logs</button>
+    </div>
+    
+    <div id="test-results" class="test-results">
+        <strong>Test Results:</strong> <span id="results-display">Not run yet</span>
+    </div>
+    
+    <div id="logs"></div>
+    
+    <script>
+        const BACKEND_URL = 'wss://holi-timesheets-backend-2ma525uu2a-uc.a.run.app/ws';
+        let socket = null;
+        let sessionData = null;
+        let testResults = {
+            connection: false,
+            googleAuth: false,
+            sessionCreation: false,
+            jobsRequest: false,
+            employeesRequest: false
+        };
+        
+        function log(message, type = 'info') {
+            const logs = document.getElementById('logs');
+            const logDiv = document.createElement('div');
+            logDiv.className = `log ${type}`;
+            logDiv.innerHTML = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logs.appendChild(logDiv);
+            logs.scrollTop = logs.scrollHeight;
+            console.log(message);
+        }
+        
+        function updateStatus(connected) {
+            const status = document.getElementById('status');
+            if (connected) {
+                status.textContent = 'Connected';
+                status.className = 'status connected';
+            } else {
+                status.textContent = 'Disconnected';
+                status.className = 'status disconnected';
+            }
+        }
+        
+        function updateResults() {
+            const resultsDisplay = document.getElementById('results-display');
+            const passed = Object.values(testResults).filter(r => r).length;
+            const total = Object.keys(testResults).length;
+            
+            resultsDisplay.innerHTML = `
+                <strong>${passed}/${total} tests passed</strong><br>
+                Connection: ${testResults.connection ? '✅' : '❌'}<br>
+                Google Auth: ${testResults.googleAuth ? '✅' : '❌'}<br>
+                Session Creation: ${testResults.sessionCreation ? '✅' : '❌'}<br>
+                Jobs Request: ${testResults.jobsRequest ? '✅' : '❌'}<br>
+                Employees Request: ${testResults.employeesRequest ? '✅' : '❌'}
+            `;
+        }
+        
+        function clearLogs() {
+            document.getElementById('logs').innerHTML = '';
+        }
+        
+        function connectWebSocket() {
+            return new Promise((resolve, reject) => {
+                log('🔌 Connecting to WebSocket...', 'info');
+                
+                if (socket && socket.readyState === WebSocket.OPEN) {
+                    log('✅ WebSocket already connected', 'success');
+                    testResults.connection = true;
+                    updateResults();
+                    resolve(socket);
+                    return;
+                }
+                
+                socket = new WebSocket(BACKEND_URL);
+                
+                socket.onopen = function() {
+                    log('✅ WebSocket connected successfully', 'success');
+                    updateStatus(true);
+                    testResults.connection = true;
+                    updateResults();
+                    resolve(socket);
+                };
+                
+                socket.onmessage = function(event) {
+                    try {
+                        const response = JSON.parse(event.data);
+                        log(`📥 Received: ${JSON.stringify(response, null, 2)}`, 'info');
+                        
+                        // Handle Google authentication response (request_id 66)
+                        if (response.request_id === 66) {
+                            if (response.success) {
+                                log('✅ Google authentication successful', 'success');
+                                testResults.googleAuth = true;
+                                updateResults();
+                            } else {
+                                log(`❌ Google authentication failed: ${response.error}`, 'error');
+                            }
+                        }
+                        
+                        // Handle Google session creation response (request_id 69)
+                        if (response.request_id === 69) {
+                            if (response.data && response.data.success) {
+                                sessionData = {
+                                    sessionId: response.data.sessionId,
+                                    csrfToken: response.data.csrfToken
+                                };
+                                sessionStorage.setItem('holi_session', JSON.stringify(sessionData));
+                                log('✅ Google session created successfully', 'success');
+                                testResults.sessionCreation = true;
+                                updateResults();
+                            } else {
+                                log(`❌ Google session creation failed: ${response.data ? response.data.error : 'Unknown error'}`, 'error');
+                            }
+                        }
+                        
+                        // Handle jobs request response (request_id 211)
+                        if (response.request_id === 211) {
+                            if (response.success) {
+                                log(`✅ Jobs request successful! Found ${response.data ? response.data.length : 0} jobs`, 'success');
+                                testResults.jobsRequest = true;
+                                updateResults();
+                            } else {
+                                log(`❌ Jobs request failed: ${response.error}`, 'error');
+                            }
+                        }
+                        
+                        // Handle employees request response (request_id 212)
+                        if (response.request_id === 212) {
+                            if (response.success) {
+                                log(`✅ Employees request successful! Found ${response.data ? response.data.length : 0} employees`, 'success');
+                                testResults.employeesRequest = true;
+                                updateResults();
+                            } else {
+                                log(`❌ Employees request failed: ${response.error}`, 'error');
+                            }
+                        }
+                    } catch (e) {
+                        log(`❌ Error parsing response: ${e.message}`, 'error');
+                    }
+                };
+                
+                socket.onerror = function(error) {
+                    log(`❌ WebSocket error: ${error}`, 'error');
+                    updateStatus(false);
+                    reject(error);
+                };
+                
+                socket.onclose = function(event) {
+                    log(`🔌 WebSocket closed: ${event.code} ${event.reason}`, 'info');
+                    updateStatus(false);
+                };
+                
+                // Timeout after 10 seconds
+                setTimeout(() => {
+                    if (socket.readyState !== WebSocket.OPEN) {
+                        reject(new Error('WebSocket connection timeout'));
+                    }
+                }, 10000);
+            });
+        }
+        
+        async function testGoogleAuthentication() {
+            log('🔐 Testing Google authentication flow...', 'info');
+            
+            // Simulate Google credential (this would normally come from Google OAuth)
+            const googleCredential = "fake_google_jwt_token_for_testing";
+            
+            const authRequest = {
+                request_id: 66, // GOOGLE_AUTH
+                data: {
+                    credential: googleCredential
+                }
+            };
+            
+            log('📤 Sending Google authentication request...', 'info');
+            socket.send(JSON.stringify(authRequest));
+            
+            // Wait for response
+            await new Promise(resolve => setTimeout(resolve, 2000));
+        }
+        
+        async function testGoogleSessionCreation() {
+            log('🔐 Testing Google session creation...', 'info');
+            
+            const sessionRequest = {
+                request_id: 69, // GOOGLE_SESSION_CREATE
+                data: {
+                    username: 'admin',
+                    email: 'admin@example.com',
+                    googleId: 'test_google_id_123',
+                    isManager: true
+                }
+            };
+            
+            log('📤 Sending Google session creation request...', 'info');
+            socket.send(JSON.stringify(sessionRequest));
+            
+            // Wait for response
+            await new Promise(resolve => setTimeout(resolve, 3000));
+        }
+        
+        async function testJobsRequest() {
+            if (!sessionData) {
+                log('❌ No session data available for jobs request', 'error');
+                return;
+            }
+            
+            log('💼 Testing jobs request...', 'info');
+            
+            const jobsRequest = {
+                request_id: 211, // GET_JOBS_BY_MANAGER
+                data: {},
+                session_id: sessionData.sessionId,
+                csrf_token: sessionData.csrfToken
+            };
+            
+            log('📤 Sending jobs request...', 'info');
+            socket.send(JSON.stringify(jobsRequest));
+            
+            // Wait for response
+            await new Promise(resolve => setTimeout(resolve, 2000));
+        }
+        
+        async function testEmployeesRequest() {
+            if (!sessionData) {
+                log('❌ No session data available for employees request', 'error');
+                return;
+            }
+            
+            log('👥 Testing employees request...', 'info');
+            
+            const employeesRequest = {
+                request_id: 212, // GET_EMPLOYEES (assuming this is the request ID)
+                data: {},
+                session_id: sessionData.sessionId,
+                csrf_token: sessionData.csrfToken
+            };
+            
+            log('📤 Sending employees request...', 'info');
+            socket.send(JSON.stringify(employeesRequest));
+            
+            // Wait for response
+            await new Promise(resolve => setTimeout(resolve, 2000));
+        }
+        
+        async function runFullTest() {
+            log('🚀 Starting complete authentication test...', 'info');
+            
+            // Reset test results
+            testResults = {
+                connection: false,
+                googleAuth: false,
+                sessionCreation: false,
+                jobsRequest: false,
+                employeesRequest: false
+            };
+            updateResults();
+            
+            try {
+                // Step 1: Connect WebSocket
+                await connectWebSocket();
+                
+                // Step 2: Test Google session creation (skip auth for now)
+                await testGoogleSessionCreation();
+                
+                // Step 3: Test jobs request
+                await testJobsRequest();
+                
+                // Step 4: Test employees request
+                await testEmployeesRequest();
+                
+                log('🎉 Complete authentication test finished!', 'success');
+                
+            } catch (error) {
+                log(`❌ Test failed: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testManagerJobs() {
+            log('💼 Testing manager jobs flow specifically...', 'info');
+            
+            try {
+                await connectWebSocket();
+                await testGoogleSessionCreation();
+                await testJobsRequest();
+                
+                log('✅ Manager jobs flow test complete', 'success');
+                
+            } catch (error) {
+                log(`❌ Manager jobs test failed: ${error.message}`, 'error');
+            }
+        }
+        
+        // Auto-start on page load
+        window.onload = function() {
+            log('🚀 Final Authentication Test Tool loaded', 'info');
+            updateResults();
+            log('Click "Run Complete Authentication Test" to start', 'info');
+        };
+    </script>
+</body>
+</html>

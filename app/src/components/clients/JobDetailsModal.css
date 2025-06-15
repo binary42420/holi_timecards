@@ -1,0 +1,413 @@
+/* Job Details Modal Styles */
+.job-details-modal {
+  background: white;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 900px;
+  max-height: 90vh;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+}
+
+.job-details-modal .modal-header {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.job-venue {
+  margin: 4px 0 2px 0;
+  opacity: 0.9;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.job-address {
+  margin: 2px 0 0 0;
+  opacity: 0.8;
+  font-size: 0.9rem;
+}
+
+/* Details Tab Styles */
+.details-tab {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.job-info-section h3,
+.venue-info-section h3,
+.description-section h3 {
+  margin: 0 0 16px 0;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #1f2937;
+  border-bottom: 2px solid #e5e7eb;
+  padding-bottom: 8px;
+}
+
+.info-item.full-width {
+  grid-column: 1 / -1;
+}
+
+.description-section .job-description {
+  background: #f9fafb;
+  padding: 16px;
+  border-radius: 8px;
+  border-left: 4px solid #10b981;
+  margin: 0;
+  line-height: 1.6;
+  color: #374151;
+}
+
+/* Shifts Tab Styles */
+.shifts-tab {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.shifts-header h3 {
+  margin: 0 0 8px 0;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.shifts-header p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.loading-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: #6b7280;
+}
+
+.shifts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.shift-item {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: all 0.2s;
+}
+
+.shift-item:hover {
+  border-color: #10b981;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.1);
+}
+
+.shift-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  cursor: pointer;
+  background: white;
+  transition: background-color 0.2s;
+}
+
+.shift-header:hover {
+  background: #f9fafb;
+}
+
+.shift-info h4 {
+  margin: 0 0 4px 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.shift-time {
+  color: #6b7280;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.shift-status {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.expand-icon {
+  color: #9ca3af;
+  font-size: 0.9rem;
+  transition: transform 0.2s;
+}
+
+.shift-requirements {
+  padding: 0 20px 16px 20px;
+  background: white;
+}
+
+.requirements-text {
+  color: #6b7280;
+  font-size: 0.85rem;
+  font-style: italic;
+}
+
+.shift-details {
+  background: #f8fafc;
+  border-top: 1px solid #e5e7eb;
+  padding: 20px;
+}
+
+.shift-workers h5,
+.shift-instructions h5,
+.shift-po h5 {
+  margin: 0 0 12px 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.workers-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.assign-workers-button {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.assign-workers-button:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+}
+
+.assign-workers-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+}
+
+.no-workers-section {
+  text-align: center;
+  padding: 20px;
+  background: #f8fafc;
+  border: 2px dashed #e5e7eb;
+  border-radius: 8px;
+}
+
+.assign-suggestion {
+  margin: 8px 0 0 0;
+  font-size: 0.875rem;
+  color: #6b7280;
+  font-style: italic;
+}
+
+.workers-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.worker-item {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 12px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.worker-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.worker-name {
+  font-weight: 500;
+  color: #1f2937;
+  font-size: 0.95rem;
+}
+
+.worker-role {
+  color: #6b7280;
+  font-size: 0.85rem;
+  text-transform: capitalize;
+}
+
+.no-workers {
+  color: #9ca3af;
+  font-style: italic;
+  margin: 0;
+  padding: 16px;
+  text-align: center;
+  background: white;
+  border: 1px dashed #d1d5db;
+  border-radius: 6px;
+}
+
+.shift-instructions,
+.shift-po {
+  margin-top: 16px;
+}
+
+.shift-instructions p,
+.shift-po p {
+  margin: 0;
+  color: #374151;
+  line-height: 1.5;
+  background: white;
+  padding: 12px;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+}
+
+/* Status Badges for Shifts */
+.status-badge.upcoming {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.status-badge.active {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.status-badge.completed {
+  background: #e0e7ff;
+  color: #3730a3;
+}
+
+/* Enhanced Status Badges */
+.status-badge {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: #6b7280;
+}
+
+.empty-state p {
+  margin: 0;
+  font-size: 1rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .job-details-modal {
+    width: 95%;
+    max-height: 95vh;
+  }
+  
+  .modal-header {
+    padding: 16px;
+  }
+  
+  .header-content h2 {
+    font-size: 1.5rem;
+  }
+  
+  .job-venue {
+    font-size: 0.9rem;
+  }
+  
+  .job-address {
+    font-size: 0.8rem;
+  }
+  
+  .modal-content {
+    padding: 16px;
+  }
+  
+  .tab-button {
+    padding: 12px 16px;
+    font-size: 0.9rem;
+  }
+  
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .shift-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 16px;
+  }
+  
+  .shift-status {
+    align-self: flex-end;
+  }
+  
+  .worker-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .worker-info {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-overlay {
+    padding: 5px;
+  }
+  
+  .job-details-modal {
+    width: 98%;
+    max-height: 98vh;
+  }
+  
+  .modal-header {
+    padding: 12px;
+  }
+  
+  .header-content h2 {
+    font-size: 1.3rem;
+  }
+  
+  .modal-content {
+    padding: 12px;
+  }
+  
+  .shift-header {
+    padding: 12px;
+  }
+  
+  .shift-details {
+    padding: 16px;
+  }
+  
+  .details-tab {
+    gap: 24px;
+  }
+}

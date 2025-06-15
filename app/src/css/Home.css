@@ -1,0 +1,8 @@
+/* Home.css - Main container styles */
+.home-container {
+    /* This file now serves as a base for the Home component */
+    /* Specific styles are in LandingPage.css and AuthenticatedHome.css */
+}
+
+/* Legacy styles removed - now using LandingPage.css and AuthenticatedHome.css */
+

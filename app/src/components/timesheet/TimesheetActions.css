@@ -1,0 +1,325 @@
+.timesheet-actions {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+
+.actions-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 30px;
+  background: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.selection-info h3 {
+  margin: 0 0 10px 0;
+  color: #2c3e50;
+  font-size: 1.2em;
+  font-weight: 600;
+}
+
+.selection-controls {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.select-all-button {
+  background: #6c757d;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  font-size: 0.9em;
+}
+
+.select-all-button:hover:not(:disabled) {
+  background: #5a6268;
+}
+
+.select-all-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.selection-count {
+  color: #7f8c8d;
+  font-weight: 500;
+  font-size: 0.9em;
+}
+
+.status-summary {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.status-counts {
+  display: flex;
+  gap: 15px;
+}
+
+.status-count {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 15px;
+  border-radius: 8px;
+  min-width: 70px;
+}
+
+.status-count.draft {
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+}
+
+.status-count.submitted {
+  background: #fff3cd;
+  border: 1px solid #ffeaa7;
+}
+
+.status-count.approved {
+  background: #d4edda;
+  border: 1px solid #c3e6cb;
+}
+
+.status-count .count {
+  font-size: 1.5em;
+  font-weight: 700;
+  color: #2c3e50;
+}
+
+.status-count .label {
+  font-size: 0.8em;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #7f8c8d;
+}
+
+.action-buttons {
+  padding: 20px 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.action-group {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.submit-button {
+  background: #f39c12;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 1em;
+}
+
+.submit-button:hover:not(:disabled) {
+  background: #e67e22;
+  transform: translateY(-1px);
+}
+
+.submit-button:disabled {
+  background: #95a5a6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.approve-button {
+  background: #27ae60;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 1em;
+}
+
+.approve-button:hover:not(:disabled) {
+  background: #229954;
+  transform: translateY(-1px);
+}
+
+.approve-button:disabled {
+  background: #95a5a6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.action-note {
+  color: #7f8c8d;
+  font-size: 0.9em;
+  font-style: italic;
+}
+
+.no-selection-message {
+  text-align: center;
+  padding: 20px;
+  color: #7f8c8d;
+  background: #f8f9fa;
+  border-radius: 6px;
+  margin: 0 30px 20px 30px;
+}
+
+.no-selection-message p {
+  margin: 0;
+  font-style: italic;
+}
+
+.workflow-info {
+  padding: 20px 30px;
+  background: #f8f9fa;
+  border-top: 1px solid #e9ecef;
+}
+
+.workflow-info h4 {
+  margin: 0 0 15px 0;
+  color: #2c3e50;
+  font-size: 1em;
+  font-weight: 600;
+}
+
+.workflow-steps {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.workflow-step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 15px;
+  background: white;
+  border: 1px solid #e9ecef;
+  border-radius: 6px;
+  flex: 1;
+  min-width: 200px;
+}
+
+.step-number {
+  background: #3498db;
+  color: white;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.8em;
+  flex-shrink: 0;
+}
+
+.step-text {
+  color: #2c3e50;
+  font-weight: 500;
+  font-size: 0.9em;
+  line-height: 1.3;
+}
+
+.workflow-arrow {
+  color: #3498db;
+  font-size: 1.2em;
+  font-weight: bold;
+  flex-shrink: 0;
+}
+
+/* Responsive design */
+@media (max-width: 1024px) {
+  .actions-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+  
+  .status-summary {
+    align-self: stretch;
+  }
+  
+  .status-counts {
+    justify-content: space-around;
+    flex: 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .timesheet-actions {
+    margin: 0 -15px 20px -15px;
+    border-radius: 0;
+  }
+  
+  .actions-header,
+  .action-buttons,
+  .workflow-info {
+    padding: 15px 20px;
+  }
+  
+  .selection-controls {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .status-counts {
+    gap: 10px;
+  }
+  
+  .status-count {
+    min-width: 60px;
+    padding: 8px 10px;
+  }
+  
+  .action-group {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .submit-button,
+  .approve-button {
+    width: 100%;
+  }
+  
+  .workflow-steps {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .workflow-step {
+    min-width: auto;
+  }
+  
+  .workflow-arrow {
+    transform: rotate(90deg);
+  }
+  
+  .no-selection-message {
+    margin: 0 20px 15px 20px;
+  }
+}
+
+/* Print styles */
+@media print {
+  .timesheet-actions {
+    display: none;
+  }
+}

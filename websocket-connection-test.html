@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WebSocket Connection Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .log { background: #f5f5f5; padding: 10px; margin: 10px 0; border-radius: 4px; }
+        .success { color: green; }
+        .error { color: red; }
+        .info { color: blue; }
+        .warning { color: orange; }
+        button { padding: 10px 20px; margin: 5px; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 4px; font-weight: bold; }
+        .connected { background: #d4edda; color: #155724; }
+        .disconnected { background: #f8d7da; color: #721c24; }
+        .url-test { background: #fff3cd; padding: 10px; border-radius: 4px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>🔌 WebSocket Connection Test</h1>
+    
+    <div class="url-test">
+        <strong>Testing WebSocket URL:</strong><br>
+        <code>wss://holi-timesheets-backend-2ma525uu2a-uc.a.run.app/ws</code>
+    </div>
+    
+    <div id="status" class="status disconnected">Disconnected</div>
+    
+    <div>
+        <button onclick="testConnection()">🔌 Test WebSocket Connection</button>
+        <button onclick="testStability()">⏱️ Test Connection Stability (30s)</button>
+        <button onclick="testAuthentication()">🔐 Test Authentication Flow</button>
+        <button onclick="clearLogs()">Clear Logs</button>
+    </div>
+    
+    <div id="logs"></div>
+    
+    <script>
+        const WEBSOCKET_URL = 'wss://holi-timesheets-backend-2ma525uu2a-uc.a.run.app/ws';
+        let socket = null;
+        let connectionStartTime = null;
+        let stabilityTest = null;
+        let messageCount = 0;
+        
+        function log(message, type = 'info') {
+            const logs = document.getElementById('logs');
+            const logDiv = document.createElement('div');
+            logDiv.className = `log ${type}`;
+            logDiv.innerHTML = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logs.appendChild(logDiv);
+            logs.scrollTop = logs.scrollHeight;
+            console.log(message);
+        }
+        
+        function updateStatus(connected, details = '') {
+            const status = document.getElementById('status');
+            if (connected) {
+                status.textContent = `Connected ${details}`;
+                status.className = 'status connected';
+            } else {
+                status.textContent = `Disconnected ${details}`;
+                status.className = 'status disconnected';
+            }
+        }
+        
+        function clearLogs() {
+            document.getElementById('logs').innerHTML = '';
+            messageCount = 0;
+        }
+        
+        function closeExistingConnection() {
+            if (socket) {
+                socket.close();
+                socket = null;
+            }
+        }
+        
+        function testConnection() {
+            log('🔌 Testing WebSocket connection...', 'info');
+            log(`URL: ${WEBSOCKET_URL}`, 'info');
+            
+            closeExistingConnection();
+            connectionStartTime = Date.now();
+            
+            socket = new WebSocket(WEBSOCKET_URL);
+            
+            socket.onopen = function(event) {
+                const connectionTime = Date.now() - connectionStartTime;
+                log(`✅ WebSocket connected successfully in ${connectionTime}ms`, 'success');
+                updateStatus(true, `(${connectionTime}ms)`);
+                
+                // Send a test message
+                const testMessage = {
+                    type: 'test',
+                    timestamp: Date.now(),
+                    message: 'Connection test'
+                };
+                
+                try {
+                    socket.send(JSON.stringify(testMessage));
+                    log('📤 Sent test message', 'info');
+                } catch (error) {
+                    log(`❌ Failed to send test message: ${error.message}`, 'error');
+                }
+            };
+            
+            socket.onmessage = function(event) {
+                messageCount++;
+                try {
+                    const data = JSON.parse(event.data);
+                    log(`📥 Message ${messageCount}: ${JSON.stringify(data, null, 2)}`, 'info');
+                } catch (error) {
+                    log(`📥 Raw message ${messageCount}: ${event.data}`, 'info');
+                }
+            };
+            
+            socket.onerror = function(error) {
+                log(`❌ WebSocket error: ${error}`, 'error');
+                updateStatus(false, '(Error)');
+            };
+            
+            socket.onclose = function(event) {
+                const connectionTime = connectionStartTime ? Date.now() - connectionStartTime : 0;
+                log(`🔌 WebSocket closed after ${connectionTime}ms: Code ${event.code}, Reason: "${event.reason}", Clean: ${event.wasClean}`, 'warning');
+                updateStatus(false, `(Closed: ${event.code})`);
+            };
+            
+            // Timeout test
+            setTimeout(() => {
+                if (socket && socket.readyState === WebSocket.CONNECTING) {
+                    log('⏰ Connection timeout after 10 seconds', 'error');
+                    socket.close();
+                }
+            }, 10000);
+        }
+        
+        function testStability() {
+            log('⏱️ Starting 30-second stability test...', 'info');
+            
+            testConnection();
+            
+            let pingCount = 0;
+            stabilityTest = setInterval(() => {
+                if (socket && socket.readyState === WebSocket.OPEN) {
+                    pingCount++;
+                    const pingMessage = {
+                        type: 'ping',
+                        count: pingCount,
+                        timestamp: Date.now()
+                    };
+                    
+                    try {
+                        socket.send(JSON.stringify(pingMessage));
+                        log(`📤 Ping ${pingCount} sent`, 'info');
+                    } catch (error) {
+                        log(`❌ Failed to send ping ${pingCount}: ${error.message}`, 'error');
+                    }
+                } else {
+                    log(`⚠️ Socket not open for ping ${pingCount + 1} (state: ${socket ? socket.readyState : 'null'})`, 'warning');
+                }
+            }, 3000);
+            
+            // Stop after 30 seconds
+            setTimeout(() => {
+                if (stabilityTest) {
+                    clearInterval(stabilityTest);
+                    stabilityTest = null;
+                    log('⏱️ 30-second stability test completed', 'success');
+                }
+            }, 30000);
+        }
+        
+        function testAuthentication() {
+            log('🔐 Testing authentication flow...', 'info');
+            
+            if (!socket || socket.readyState !== WebSocket.OPEN) {
+                log('❌ WebSocket not connected. Testing connection first...', 'warning');
+                testConnection();
+                
+                // Wait for connection then test auth
+                setTimeout(() => {
+                    if (socket && socket.readyState === WebSocket.OPEN) {
+                        performAuthTest();
+                    } else {
+                        log('❌ Failed to establish connection for auth test', 'error');
+                    }
+                }, 2000);
+            } else {
+                performAuthTest();
+            }
+        }
+        
+        function performAuthTest() {
+            log('🔐 Performing authentication test...', 'info');
+            
+            // Test Google session creation
+            const sessionRequest = {
+                request_id: 69, // GOOGLE_SESSION_CREATE
+                data: {
+                    username: 'admin',
+                    email: 'admin@example.com',
+                    googleId: 'test_google_id_123',
+                    isManager: true
+                }
+            };
+            
+            try {
+                socket.send(JSON.stringify(sessionRequest));
+                log('📤 Sent Google session creation request', 'info');
+            } catch (error) {
+                log(`❌ Failed to send auth request: ${error.message}`, 'error');
+            }
+        }
+        
+        // Auto-start basic connection test
+        window.onload = function() {
+            log('🚀 WebSocket Connection Test Tool loaded', 'info');
+            log('Click "Test WebSocket Connection" to start', 'info');
+        };
+    </script>
+</body>
+</html>

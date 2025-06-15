@@ -1,0 +1,46 @@
+{
+  "project_id": "holitimecards",
+  "region": "us-central1",
+  "services": {
+    "backend": {
+      "name": "easyshifts-backend",
+      "port": 8080,
+      "memory": "1Gi",
+      "cpu": 1,
+      "timeout": 300,
+      "concurrency": 100,
+      "max_instances": 10,
+      "environment_variables": {
+        "DB_HOST": "miano.h.filess.io",
+        "DB_PORT": "3305",
+        "DB_NAME": "easyshiftsdb_danceshall",
+        "DB_USER": "easyshiftsdb_danceshall",
+        "DB_PASSWORD": "a61d15d9b4f2671739338d1082cc7b75c0084e21",
+        "REDIS_HOST": "redis-12649.c328.europe-west3-1.gce.redns.redis-cloud.com",
+        "REDIS_PORT": "12649",
+        "REDIS_PASSWORD": "AtpYvgs0JUs0KvuZm93yvTEzkXEg4fNa",
+        "SESSION_SECRET_KEY": "your-session-secret-key-here",
+        "CSRF_SECRET_KEY": "your-csrf-secret-key-here"
+      }
+    },
+    "frontend": {
+      "name": "easyshifts-frontend",
+      "port": 80,
+      "memory": "512Mi",
+      "cpu": 1,
+      "timeout": 300,
+      "concurrency": 100,
+      "max_instances": 5,
+      "environment_variables": {
+        "REACT_APP_BACKEND_URL": "https://easyshifts-backend-123456789-uc.a.run.app",
+        "REACT_APP_WS_URL": "wss://easyshifts-backend-123456789-uc.a.run.app/ws"
+      }
+    }
+  },
+  "build_options": {
+    "cleanup_after_deployment": false,
+    "run_tests": true,
+    "push_latest_tag": true
+  }
+}
+

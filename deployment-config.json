@@ -1,0 +1,74 @@
+{
+  "project": {
+    "id": "holitimecards",
+    "region": "us-central1",
+    "servicePrefix": "holi-timesheets"
+  },
+  "services": {
+    "backend": {
+      "name": "holi-timesheets-backend",
+      "memory": "1Gi",
+      "cpu": 1,
+      "concurrency": 100,
+      "timeout": 300,
+      "port": 8080
+    },
+    "frontend": {
+      "name": "holi-timesheets-frontend",
+      "memory": "512Mi",
+      "cpu": 1,
+      "concurrency": 1000,
+      "timeout": 300,
+      "port": 8080
+    }
+  },
+  "database": {
+    "host": "miano.h.filess.io",
+    "port": "3305",
+    "user": "easyshiftsdb_danceshall",
+    "name": "easyshiftsdb_danceshall"
+  },
+  "redis": {
+    "host": "redis-12649.c328.europe-west3-1.gce.redns.redis-cloud.com",
+    "port": "12649"
+  },
+  "oauth": {
+    "googleClientId": "444854334434-fqapk7semoggrnj247bv8auqe4n32ldl.apps.googleusercontent.com"
+  },
+  "environments": {
+    "development": {
+      "frontendUrl": "http://localhost:3000",
+      "backendUrl": "ws://localhost:8080"
+    },
+    "production": {
+      "frontendUrl": "https://holi-timesheets-frontend-794306818447.us-central1.run.app",
+      "backendUrl": "wss://holi-timesheets-backend-794306818447.us-central1.run.app"
+    }
+  },
+  "deployment": {
+    "artifactRegistry": {
+      "repository": "holi-timesheets-repo",
+      "location": "us-central1"
+    },
+    "serviceAccount": "holi-timesheets-sa",
+    "requiredRoles": [
+      "roles/cloudsql.client",
+      "roles/logging.logWriter",
+      "roles/monitoring.metricWriter"
+    ],
+    "healthCheck": {
+      "backend": {
+        "endpoint": "/health",
+        "maxRetries": 10,
+        "retryDelay": 30
+      },
+      "frontend": {
+        "maxRetries": 5,
+        "retryDelay": 15
+      }
+    }
+  }
+}
+
+
+

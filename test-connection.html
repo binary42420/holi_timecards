@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EasyShifts Connection Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .warning { background-color: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+        .info { background-color: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background-color: #0056b3; }
+        button:disabled { background-color: #6c757d; cursor: not-allowed; }
+        .log {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 10px;
+            margin: 10px 0;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔌 EasyShifts Connection Test</h1>
+        
+        <div id="status" class="status info">Ready to test connections</div>
+        
+        <h3>Configuration</h3>
+        <label>Backend URL:</label>
+        <input type="text" id="backendUrl" value="https://easyshifts-backend-s5b2sxgpsa-uc.a.run.app" readonly>
+
+        <label>WebSocket URL:</label>
+        <input type="text" id="wsUrl" value="wss://easyshifts-backend-s5b2sxgpsa-uc.a.run.app/ws" readonly>
+        
+        <h3>Tests</h3>
+        <button onclick="testHttpConnection()">Test HTTP Connection</button>
+        <button onclick="testWebSocketConnection()">Test WebSocket Connection</button>
+        <button onclick="testLogin()">Test Login</button>
+        <button onclick="clearLog()">Clear Log</button>
+        
+        <h3>Test Log</h3>
+        <div id="log" class="log"></div>
+    </div>
+
+    <script>
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logDiv = document.getElementById('log');
+            const entry = document.createElement('div');
+            entry.innerHTML = `[${timestamp}] ${message}`;
+            entry.className = type;
+            logDiv.appendChild(entry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function updateStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = message;
+            statusDiv.className = `status ${type}`;
+        }
+
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+        }
+
+        async function testHttpConnection() {
+            const backendUrl = document.getElementById('backendUrl').value;
+            log('🌐 Testing HTTP connection...', 'info');
+            updateStatus('Testing HTTP connection...', 'warning');
+            
+            try {
+                const healthUrl = `${backendUrl}/health`;
+                log(`📡 Requesting: ${healthUrl}`, 'info');
+                
+                const response = await fetch(healthUrl, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    log(`✅ HTTP connection successful: ${response.status}`, 'success');
+                    log(`📊 Response: ${JSON.stringify(data, null, 2)}`, 'info');
+                    updateStatus('HTTP connection successful', 'success');
+                } else {
+                    log(`❌ HTTP connection failed: ${response.status} ${response.statusText}`, 'error');
+                    updateStatus('HTTP connection failed', 'error');
+                }
+            } catch (error) {
+                log(`❌ HTTP connection error: ${error.message}`, 'error');
+                updateStatus('HTTP connection error', 'error');
+            }
+        }
+
+        function testWebSocketConnection() {
+            const wsUrl = document.getElementById('wsUrl').value;
+            log('🔌 Testing WebSocket connection...', 'info');
+            updateStatus('Testing WebSocket connection...', 'warning');
+            
+            try {
+                const ws = new WebSocket(wsUrl);
+                
+                ws.onopen = function() {
+                    log('✅ WebSocket connection established', 'success');
+                    updateStatus('WebSocket connection successful', 'success');
+                    
+                    // Send a ping message
+                    const pingMessage = { type: 'ping', timestamp: Date.now() };
+                    ws.send(JSON.stringify(pingMessage));
+                    log(`📤 Sent ping: ${JSON.stringify(pingMessage)}`, 'info');
+                };
+                
+                ws.onmessage = function(event) {
+                    log(`📥 Received: ${event.data}`, 'info');
+                };
+                
+                ws.onerror = function(error) {
+                    log(`❌ WebSocket error: ${error}`, 'error');
+                    updateStatus('WebSocket connection error', 'error');
+                };
+                
+                ws.onclose = function(event) {
+                    log(`🔌 WebSocket closed: Code ${event.code}, Reason: ${event.reason}`, 'warning');
+                    if (event.code !== 1000) {
+                        updateStatus('WebSocket connection closed unexpectedly', 'error');
+                    }
+                };
+                
+                // Close connection after 5 seconds
+                setTimeout(() => {
+                    if (ws.readyState === WebSocket.OPEN) {
+                        ws.close(1000, 'Test completed');
+                        log('🔌 Test completed, closing connection', 'info');
+                    }
+                }, 5000);
+                
+            } catch (error) {
+                log(`❌ WebSocket connection failed: ${error.message}`, 'error');
+                updateStatus('WebSocket connection failed', 'error');
+            }
+        }
+
+        function testLogin() {
+            const wsUrl = document.getElementById('wsUrl').value;
+            log('🔐 Testing login functionality...', 'info');
+            updateStatus('Testing login...', 'warning');
+            
+            try {
+                const ws = new WebSocket(wsUrl);
+                
+                ws.onopen = function() {
+                    log('✅ WebSocket connected for login test', 'success');
+                    
+                    // Send login request
+                    const loginRequest = {
+                        request_id: 1, // LOGIN_REQUEST
+                        data: {
+                            username: 'admin',
+                            password: 'Hdfatboy1!'
+                        }
+                    };
+                    
+                    ws.send(JSON.stringify(loginRequest));
+                    log(`📤 Sent login request: ${JSON.stringify(loginRequest, null, 2)}`, 'info');
+                };
+                
+                ws.onmessage = function(event) {
+                    try {
+                        const response = JSON.parse(event.data);
+                        log(`📥 Login response: ${JSON.stringify(response, null, 2)}`, 'info');
+                        
+                        if (response.success) {
+                            log('✅ Login successful!', 'success');
+                            updateStatus('Login test successful', 'success');
+                        } else {
+                            log('❌ Login failed', 'error');
+                            updateStatus('Login test failed', 'error');
+                        }
+                    } catch (e) {
+                        log(`📥 Raw response: ${event.data}`, 'info');
+                    }
+                };
+                
+                ws.onerror = function(error) {
+                    log(`❌ Login test WebSocket error: ${error}`, 'error');
+                    updateStatus('Login test connection error', 'error');
+                };
+                
+                ws.onclose = function(event) {
+                    log(`🔌 Login test WebSocket closed: Code ${event.code}`, 'warning');
+                };
+                
+                // Close connection after 10 seconds
+                setTimeout(() => {
+                    if (ws.readyState === WebSocket.OPEN) {
+                        ws.close(1000, 'Login test completed');
+                        log('🔌 Login test completed, closing connection', 'info');
+                    }
+                }, 10000);
+                
+            } catch (error) {
+                log(`❌ Login test failed: ${error.message}`, 'error');
+                updateStatus('Login test failed', 'error');
+            }
+        }
+
+        // Auto-run HTTP test on page load
+        window.onload = function() {
+            log('🚀 EasyShifts Connection Test initialized', 'info');
+            setTimeout(testHttpConnection, 1000);
+        };
+    </script>
+</body>
+</html>

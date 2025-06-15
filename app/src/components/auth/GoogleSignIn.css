@@ -1,0 +1,104 @@
+/* Google Sign-In Styles */
+.google-signin-container {
+  width: 100%;
+  margin: 16px 0;
+}
+
+/* Disabled/Not Configured State */
+.google-signin-disabled {
+  width: 100%;
+  margin: 16px 0;
+}
+
+.config-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  background: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 8px;
+  color: #856404;
+}
+
+.config-icon {
+  font-size: 1.2rem;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.config-text {
+  flex: 1;
+}
+
+.config-text strong {
+  display: block;
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+
+.config-text p {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.google-signin-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  background-color: #f8f9fa;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.google-signin-loading .loading-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #f3f3f3;
+  border-top: 2px solid #4285f4;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Override Google button styles for consistency */
+.google-signin-container > div {
+  width: 100% !important;
+}
+
+.google-signin-container button {
+  width: 100% !important;
+  justify-content: center !important;
+  font-family: inherit !important;
+  font-size: 0.95rem !important;
+  padding: 12px 16px !important;
+  border-radius: 8px !important;
+  transition: all 0.2s ease !important;
+}
+
+.google-signin-container button:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(66, 133, 244, 0.15) !important;
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+  .google-signin-container button {
+    font-size: 0.9rem !important;
+    padding: 10px 14px !important;
+  }
+  
+  .google-signin-loading {
+    padding: 10px 14px;
+    font-size: 0.9rem;
+  }
+}

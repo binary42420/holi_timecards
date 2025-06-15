@@ -1,0 +1,293 @@
+.schedule-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 25px;
+  background: white;
+  border-bottom: 2px solid #e9ecef;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  flex-shrink: 0;
+}
+
+.toolbar-section {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.toolbar-left {
+  flex: 1;
+}
+
+.toolbar-center {
+  flex: 0 0 auto;
+}
+
+.toolbar-right {
+  flex: 1;
+  justify-content: flex-end;
+}
+
+/* Today button */
+.today-button {
+  background: #6c757d;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.today-button:hover {
+  background: #5a6268;
+  transform: translateY(-1px);
+}
+
+/* Navigation controls */
+.navigation-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nav-button {
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  color: #495057;
+  width: 40px;
+  height: 40px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1em;
+}
+
+.nav-button:hover {
+  background: #e9ecef;
+  border-color: #adb5bd;
+}
+
+.nav-button:active {
+  transform: scale(0.95);
+}
+
+.date-display {
+  font-size: 1.2em;
+  font-weight: 600;
+  color: #2c3e50;
+  min-width: 250px;
+  text-align: center;
+  padding: 0 15px;
+}
+
+/* View selector */
+.view-selector {
+  display: flex;
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.view-button {
+  background: transparent;
+  border: none;
+  padding: 12px 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  color: #495057;
+  border-right: 1px solid #dee2e6;
+}
+
+.view-button:last-child {
+  border-right: none;
+}
+
+.view-button:hover {
+  background: #e9ecef;
+}
+
+.view-button.active {
+  background: #3498db;
+  color: white;
+}
+
+.view-icon {
+  font-size: 1.1em;
+}
+
+.view-label {
+  font-size: 0.9em;
+}
+
+/* Panel toggle button */
+.panel-toggle-button {
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  color: #495057;
+  padding: 10px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+}
+
+.panel-toggle-button:hover {
+  background: #e9ecef;
+  border-color: #adb5bd;
+}
+
+.panel-toggle-button.active {
+  background: #3498db;
+  color: white;
+  border-color: #3498db;
+}
+
+.panel-icon {
+  font-size: 1.1em;
+}
+
+.panel-label {
+  font-size: 0.9em;
+}
+
+/* Create shift button */
+.create-shift-button {
+  background: #27ae60;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.create-shift-button:hover {
+  background: #229954;
+  transform: translateY(-1px);
+}
+
+.create-icon {
+  font-size: 1.1em;
+}
+
+.create-label {
+  font-size: 0.95em;
+}
+
+/* Responsive design */
+@media (max-width: 1024px) {
+  .schedule-toolbar {
+    flex-wrap: wrap;
+    gap: 15px;
+    padding: 15px 20px;
+  }
+  
+  .toolbar-section {
+    flex: none;
+  }
+  
+  .toolbar-left,
+  .toolbar-right {
+    flex: none;
+  }
+  
+  .date-display {
+    min-width: auto;
+    font-size: 1.1em;
+  }
+}
+
+@media (max-width: 768px) {
+  .schedule-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 15px;
+  }
+  
+  .toolbar-section {
+    justify-content: center;
+  }
+  
+  .toolbar-left,
+  .toolbar-right {
+    justify-content: center;
+  }
+  
+  .navigation-controls {
+    justify-content: center;
+  }
+  
+  .date-display {
+    font-size: 1em;
+    padding: 0 10px;
+  }
+  
+  .view-button {
+    padding: 10px 16px;
+  }
+  
+  .view-label {
+    display: none;
+  }
+  
+  .panel-label,
+  .create-label {
+    display: none;
+  }
+}
+
+/* Print styles */
+@media print {
+  .schedule-toolbar {
+    border-bottom: 1px solid #ddd;
+    box-shadow: none;
+    background: white;
+  }
+  
+  .today-button,
+  .nav-button,
+  .panel-toggle-button,
+  .create-shift-button {
+    display: none;
+  }
+  
+  .view-selector {
+    display: none;
+  }
+  
+  .toolbar-left,
+  .toolbar-right {
+    display: none;
+  }
+  
+  .toolbar-center {
+    flex: 1;
+    justify-content: center;
+  }
+  
+  .date-display {
+    font-size: 1.3em;
+    font-weight: bold;
+    color: #000;
+  }
+}

@@ -1,0 +1,259 @@
+.week-view {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.week-header {
+  display: grid;
+  grid-template-columns: 80px repeat(7, 1fr);
+  background: #f8f9fa;
+  border-bottom: 2px solid #e9ecef;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.time-column-header {
+  padding: 15px 10px;
+  font-weight: 600;
+  color: #2c3e50;
+  text-align: center;
+  border-right: 1px solid #e9ecef;
+  background: #f8f9fa;
+}
+
+.day-header {
+  padding: 15px 10px;
+  text-align: center;
+  border-right: 1px solid #e9ecef;
+  background: #f8f9fa;
+}
+
+.day-name {
+  font-weight: 600;
+  color: #2c3e50;
+  font-size: 0.9em;
+  margin-bottom: 4px;
+}
+
+.day-date {
+  color: #7f8c8d;
+  font-size: 0.8em;
+}
+
+.week-grid {
+  display: grid;
+  grid-template-columns: 80px repeat(7, 1fr);
+  flex: 1;
+  overflow-y: auto;
+}
+
+.time-column {
+  background: #f8f9fa;
+  border-right: 1px solid #e9ecef;
+  position: sticky;
+  left: 0;
+  z-index: 5;
+}
+
+.time-slot-label {
+  height: 60px;
+  padding: 8px;
+  border-bottom: 1px solid #e9ecef;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8em;
+  color: #7f8c8d;
+  font-weight: 500;
+}
+
+.day-column {
+  border-right: 1px solid #e9ecef;
+  position: relative;
+}
+
+.time-slot {
+  height: 60px;
+  border-bottom: 1px solid #f0f0f0;
+  position: relative;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.time-slot:hover {
+  background: #f8f9fa;
+}
+
+.time-slot.selected {
+  background: #e3f2fd;
+  border: 2px solid #3498db;
+}
+
+.time-slot.has-shifts {
+  background: #fff;
+}
+
+.time-slot.empty-slot {
+  background: #fafafa;
+}
+
+.time-slot.drag-over {
+  background: #e8f5e8;
+  border: 2px dashed #27ae60;
+}
+
+.time-slot.drop-target {
+  border: 1px dashed #3498db;
+}
+
+.week-view-legend {
+  display: flex;
+  gap: 20px;
+  padding: 15px 20px;
+  background: #f8f9fa;
+  border-top: 1px solid #e9ecef;
+  flex-wrap: wrap;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9em;
+}
+
+.legend-color {
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+  border: 1px solid #ddd;
+}
+
+.legend-color.understaffed {
+  background: #f39c12;
+}
+
+.legend-color.fully-staffed {
+  background: #27ae60;
+}
+
+.legend-color.overstaffed {
+  background: #3498db;
+}
+
+.legend-color.no-workers {
+  background: #e74c3c;
+}
+
+.week-view-instructions {
+  padding: 15px 20px;
+  background: #f8f9fa;
+  border-top: 1px solid #e9ecef;
+}
+
+.week-view-instructions p {
+  margin: 0 0 10px 0;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.week-view-instructions ul {
+  margin: 0;
+  padding-left: 20px;
+  color: #7f8c8d;
+}
+
+.week-view-instructions li {
+  margin-bottom: 5px;
+  font-size: 0.9em;
+}
+
+/* Responsive design */
+@media (max-width: 1024px) {
+  .week-header {
+    grid-template-columns: 60px repeat(7, 1fr);
+  }
+  
+  .week-grid {
+    grid-template-columns: 60px repeat(7, 1fr);
+  }
+  
+  .time-column-header,
+  .time-slot-label {
+    font-size: 0.7em;
+    padding: 8px 4px;
+  }
+  
+  .day-header {
+    padding: 10px 5px;
+  }
+  
+  .day-name {
+    font-size: 0.8em;
+  }
+  
+  .day-date {
+    font-size: 0.7em;
+  }
+}
+
+@media (max-width: 768px) {
+  .week-view {
+    font-size: 0.9em;
+  }
+  
+  .week-header {
+    grid-template-columns: 50px repeat(7, 1fr);
+  }
+  
+  .week-grid {
+    grid-template-columns: 50px repeat(7, 1fr);
+  }
+  
+  .time-slot {
+    height: 50px;
+  }
+  
+  .time-slot-label {
+    height: 50px;
+    font-size: 0.6em;
+  }
+  
+  .legend-item {
+    font-size: 0.8em;
+  }
+  
+  .week-view-instructions {
+    display: none;
+  }
+}
+
+/* Print styles */
+@media print {
+  .week-view {
+    height: auto;
+    overflow: visible;
+  }
+  
+  .week-grid {
+    overflow: visible;
+  }
+  
+  .week-view-legend,
+  .week-view-instructions {
+    display: none;
+  }
+  
+  .time-slot {
+    cursor: default;
+  }
+  
+  .time-slot:hover {
+    background: inherit;
+  }
+}
