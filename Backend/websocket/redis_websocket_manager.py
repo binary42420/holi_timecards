@@ -27,7 +27,7 @@ class RedisWebSocketManager:
         self.ws_user_mapping_key = "easyshifts:ws:user_mapping"
         self.ws_heartbeat_key = "easyshifts:ws:heartbeat"
         
-    async def register_connection(self, websocket, websocket_id: str, session_id: str, user_data: Dict) -> bool:
+    def register_connection(self, websocket, websocket_id: str, session_id: str, user_data: Dict) -> bool:
         """Register a new WebSocket connection"""
         try:
             # Validate session
@@ -82,38 +82,38 @@ class RedisWebSocketManager:
             logger.error(f"Failed to register WebSocket connection {websocket_id}: {e}")
             return False
     
-    async def unregister_connection(self, websocket_id: str) -> bool:
+    def unregister_connection(self, websocket_id: str) -> bool:
         """Unregister a WebSocket connection"""
         try:
             # Get connection data before removal
             session_id = self.connection_sessions.get(websocket_id)
             user_id = None
-            
+
             if session_id:
                 session_data = secure_session_manager.validate_session(session_id)
                 if session_data:
                     user_id = session_data.get('user_id')
-            
+
             # Remove from local storage
             self.connections.pop(websocket_id, None)
             self.connection_sessions.pop(websocket_id, None)
-            
+
             if user_id and user_id in self.user_connections:
                 self.user_connections[user_id].discard(websocket_id)
                 if not self.user_connections[user_id]:
                     del self.user_connections[user_id]
-            
+
             # Remove from Redis
-            redis_client = await self.redis_config.get_async_connection()
-            
-            await redis_client.hdel(self.ws_connections_key, websocket_id)
-            
+            redis_client = self.redis_config.get_sync_connection()
+
+            redis_client.hdel(self.ws_connections_key, websocket_id)
+
             if user_id:
-                await redis_client.srem(f"{self.ws_user_mapping_key}:{user_id}", websocket_id)
-            
+                redis_client.srem(f"{self.ws_user_mapping_key}:{user_id}", websocket_id)
+
             logger.info(f"Unregistered WebSocket connection {websocket_id}")
             return True
-            
+
         except Exception as e:
             logger.error(f"Failed to unregister WebSocket connection {websocket_id}: {e}")
             return False
@@ -122,11 +122,11 @@ class RedisWebSocketManager:
         """Send message to all connections for a specific user"""
         try:
             sent_count = 0
-            
+
             # Get user's connections from Redis
-            redis_client = await self.redis_config.get_async_connection()
-            websocket_ids = await redis_client.smembers(f"{self.ws_user_mapping_key}:{user_id}")
-            
+            redis_client = self.redis_config.get_sync_connection()
+            websocket_ids = redis_client.smembers(f"{self.ws_user_mapping_key}:{user_id}")
+
             for websocket_id in websocket_ids:
                 websocket = self.connections.get(websocket_id)
                 if websocket:
@@ -136,10 +136,10 @@ class RedisWebSocketManager:
                     except Exception as e:
                         logger.warning(f"Failed to send message to WebSocket {websocket_id}: {e}")
                         # Clean up dead connection
-                        await self.unregister_connection(websocket_id)
-            
+                        self.unregister_connection(websocket_id)
+
             return sent_count
-            
+
         except Exception as e:
             logger.error(f"Failed to send message to user {user_id}: {e}")
             return 0
@@ -148,11 +148,11 @@ class RedisWebSocketManager:
         """Send message to all manager connections"""
         try:
             sent_count = 0
-            
+
             # Get all connections from Redis
-            redis_client = await self.redis_config.get_async_connection()
-            all_connections = await redis_client.hgetall(self.ws_connections_key)
-            
+            redis_client = self.redis_config.get_sync_connection()
+            all_connections = redis_client.hgetall(self.ws_connections_key)
+
             for websocket_id, connection_data_str in all_connections.items():
                 try:
                     connection_data = json.loads(connection_data_str)
@@ -163,9 +163,9 @@ class RedisWebSocketManager:
                             sent_count += 1
                 except Exception as e:
                     logger.warning(f"Failed to send message to manager WebSocket {websocket_id}: {e}")
-            
+
             return sent_count
-            
+
         except Exception as e:
             logger.error(f"Failed to send message to managers: {e}")
             return 0
@@ -174,7 +174,7 @@ class RedisWebSocketManager:
         """Broadcast message to all connected users"""
         try:
             sent_count = 0
-            
+
             for websocket_id, websocket in self.connections.items():
                 try:
                     await websocket.send(json.dumps(message))
@@ -182,18 +182,18 @@ class RedisWebSocketManager:
                 except Exception as e:
                     logger.warning(f"Failed to broadcast to WebSocket {websocket_id}: {e}")
                     # Clean up dead connection
-                    await self.unregister_connection(websocket_id)
-            
+                    self.unregister_connection(websocket_id)
+
             return sent_count
-            
+
         except Exception as e:
             logger.error(f"Failed to broadcast message: {e}")
             return 0
     
-    async def update_heartbeat(self, websocket_id: str) -> bool:
+    def update_heartbeat(self, websocket_id: str) -> bool:
         """Update heartbeat timestamp for a connection"""
         try:
-            redis_client = await self.redis_config.get_async_connection()
+            redis_client = self.redis_config.get_sync_connection()
 
             # Check if redis_client is None
             if redis_client is None:
@@ -201,12 +201,12 @@ class RedisWebSocketManager:
                 return False
 
             # Update heartbeat in connection data
-            connection_data_str = await redis_client.hget(self.ws_connections_key, websocket_id)
+            connection_data_str = redis_client.hget(self.ws_connections_key, websocket_id)
             if connection_data_str:
                 connection_data = json.loads(connection_data_str)
                 connection_data['last_heartbeat'] = datetime.utcnow().isoformat()
 
-                await redis_client.hset(
+                redis_client.hset(
                     self.ws_connections_key,
                     websocket_id,
                     json.dumps(connection_data)
@@ -219,49 +219,49 @@ class RedisWebSocketManager:
             logger.error(f"Failed to update heartbeat for WebSocket {websocket_id}: {e}")
             return False
     
-    async def cleanup_stale_connections(self) -> int:
+    def cleanup_stale_connections(self) -> int:
         """Clean up stale connections that haven't sent heartbeat"""
         try:
-            redis_client = await self.redis_config.get_async_connection()
+            redis_client = self.redis_config.get_sync_connection()
 
             # Check if redis_client is None
             if redis_client is None:
                 logger.warning("Redis client is None, cannot cleanup stale connections")
                 return 0
 
-            all_connections = await redis_client.hgetall(self.ws_connections_key)
-            
+            all_connections = redis_client.hgetall(self.ws_connections_key)
+
             stale_threshold = datetime.utcnow() - timedelta(minutes=5)
             cleaned_count = 0
-            
+
             for websocket_id, connection_data_str in all_connections.items():
                 try:
                     connection_data = json.loads(connection_data_str)
                     last_heartbeat = datetime.fromisoformat(connection_data.get('last_heartbeat'))
-                    
+
                     if last_heartbeat < stale_threshold:
-                        await self.unregister_connection(websocket_id)
+                        self.unregister_connection(websocket_id)
                         cleaned_count += 1
-                        
+
                 except Exception as e:
                     logger.warning(f"Error checking connection {websocket_id}: {e}")
-                    await self.unregister_connection(websocket_id)
+                    self.unregister_connection(websocket_id)
                     cleaned_count += 1
-            
+
             if cleaned_count > 0:
                 logger.info(f"Cleaned up {cleaned_count} stale WebSocket connections")
-            
+
             return cleaned_count
-            
+
         except Exception as e:
             logger.error(f"Failed to cleanup stale connections: {e}")
             return 0
     
-    async def get_connection_stats(self) -> Dict:
+    def get_connection_stats(self) -> Dict:
         """Get statistics about current connections"""
         try:
-            redis_client = await self.redis_config.get_async_connection()
-            all_connections = await redis_client.hgetall(self.ws_connections_key)
+            redis_client = self.redis_config.get_sync_connection()
+            all_connections = redis_client.hgetall(self.ws_connections_key)
             
             stats = {
                 'total_connections': len(all_connections),
@@ -292,7 +292,7 @@ class RedisWebSocketManager:
         while True:
             try:
                 await asyncio.sleep(60)  # Check every minute
-                await self.cleanup_stale_connections()
+                self.cleanup_stale_connections()
             except Exception as e:
                 logger.error(f"Error in heartbeat monitor: {e}")
                 await asyncio.sleep(60)

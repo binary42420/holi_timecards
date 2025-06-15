@@ -1459,7 +1459,7 @@ async def handle_websocket_request(request):
                     if request_data.get('type') == 'heartbeat' and request_data.get('timestamp'):
                         # If the client sends a heartbeat, update Redis
                         websocket_id = str(client_id)
-                        await redis_websocket_manager.update_heartbeat(websocket_id)
+                        redis_websocket_manager.update_heartbeat(websocket_id)
                         logger.debug(f"Updated heartbeat for WebSocket {websocket_id}")
                         continue
 
