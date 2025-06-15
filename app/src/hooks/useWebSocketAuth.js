@@ -92,7 +92,7 @@ export const useWebSocketAuth = (socket) => {
                         });
 
                         if (response.request_id === 10) { // LOGIN_REQUEST response
-                            socket.removeEventListener('message', handleAuthResponse);
+                            cleanup();
                             authAttemptRef.current = false;
                             setIsAuthenticating(false);
 
@@ -127,7 +127,7 @@ export const useWebSocketAuth = (socket) => {
                             }
                         }
                     } catch (error) {
-                        socket.removeEventListener('message', handleAuthResponse);
+                        cleanup();
                         authAttemptRef.current = false;
                         setIsAuthenticating(false);
                         const errorMsg = `Error processing auth response: ${error.message}`;
@@ -158,24 +158,24 @@ export const useWebSocketAuth = (socket) => {
                 socket.send(JSON.stringify(loginRequest));
                 logDebug('useWebSocketAuth', 'Sent WebSocket authentication request');
 
-                // Timeout after 30 seconds (increased from 10)
+                // Timeout after 30 seconds with proper cleanup
                 const timeoutId = setTimeout(() => {
-                    socket.removeEventListener('message', handleAuthResponse);
-                    authAttemptRef.current = false;
-                    setIsAuthenticating(false);
+                    cleanup();
                     const error = 'WebSocket authentication timed out after 30 seconds';
                     logError('useWebSocketAuth', error);
                     setAuthError(error);
                     setIsAuthenticated(false);
+                    setIsAuthenticating(false);
+                    authAttemptRef.current = false;
                     reject(new Error(error));
                 }, 30000);
 
-                // Clear timeout if we get a response
-                const originalHandler = handleAuthResponse;
-                handleAuthResponse = (event) => {
+                const cleanup = () => {
                     clearTimeout(timeoutId);
-                    originalHandler(event);
+                    socket.removeEventListener('message', handleAuthResponse);
                 };
+
+                // No need to redefine handleAuthResponse - it already uses cleanup
             });
 
 

@@ -27,6 +27,34 @@ class RedisWebSocketManager:
         self.ws_user_mapping_key = "easyshifts:ws:user_mapping"
         self.ws_heartbeat_key = "easyshifts:ws:heartbeat"
         
+    async def register_connection_async(self, websocket, websocket_id: str, connection_data: Dict) -> bool:
+        """Register a new WebSocket connection (async version)"""
+        try:
+            # Store connection locally
+            self.connections[websocket_id] = websocket
+
+            # Store connection data in Redis
+            redis_client = self.redis_config.get_sync_connection()
+            connection_info = {
+                'websocket_id': websocket_id,
+                'connected_at': datetime.utcnow().isoformat(),
+                'client_info': connection_data
+            }
+
+            # Store with 1 hour TTL (will be refreshed by heartbeat)
+            redis_client.setex(
+                f"{self.ws_connections_key}:{websocket_id}",
+                3600,
+                json.dumps(connection_info, default=str)
+            )
+
+            logger.info(f"Registered WebSocket connection: {websocket_id}")
+            return True
+
+        except Exception as e:
+            logger.error(f"Failed to register WebSocket connection {websocket_id}: {e}")
+            return False
+
     def register_connection(self, websocket, websocket_id: str, session_id: str, user_data: Dict) -> bool:
         """Register a new WebSocket connection"""
         try:
@@ -82,6 +110,36 @@ class RedisWebSocketManager:
             logger.error(f"Failed to register WebSocket connection {websocket_id}: {e}")
             return False
     
+    async def unregister_connection_async(self, websocket_id: str) -> bool:
+        """Unregister a WebSocket connection (async version)"""
+        try:
+            # Remove from local storage
+            if websocket_id in self.connections:
+                del self.connections[websocket_id]
+
+            if websocket_id in self.connection_sessions:
+                del self.connection_sessions[websocket_id]
+
+            # Remove from Redis
+            redis_client = self.redis_config.get_sync_connection()
+            redis_client.delete(f"{self.ws_connections_key}:{websocket_id}")
+
+            # Remove from user mappings
+            for user_id, websocket_ids in list(self.user_connections.items()):
+                if websocket_id in websocket_ids:
+                    websocket_ids.discard(websocket_id)
+                    redis_client.srem(f"{self.ws_user_mapping_key}:{user_id}", websocket_id)
+                    if not websocket_ids:
+                        del self.user_connections[user_id]
+                    break
+
+            logger.info(f"Unregistered WebSocket connection: {websocket_id}")
+            return True
+
+        except Exception as e:
+            logger.error(f"Failed to unregister WebSocket connection {websocket_id}: {e}")
+            return False
+
     def unregister_connection(self, websocket_id: str) -> bool:
         """Unregister a WebSocket connection"""
         try:
@@ -190,6 +248,26 @@ class RedisWebSocketManager:
             logger.error(f"Failed to broadcast message: {e}")
             return 0
     
+    async def update_heartbeat_async(self, websocket_id: str) -> bool:
+        """Update heartbeat timestamp for a WebSocket connection (async version)"""
+        try:
+            redis_client = self.redis_config.get_sync_connection()
+            heartbeat_key = f"{self.ws_heartbeat_key}:{websocket_id}"
+
+            # Update heartbeat with 5 minute TTL
+            redis_client.setex(heartbeat_key, 300, datetime.utcnow().isoformat())
+
+            # Also update connection TTL
+            connection_key = f"{self.ws_connections_key}:{websocket_id}"
+            redis_client.expire(connection_key, 3600)  # Extend to 1 hour
+
+            logger.debug(f"Updated heartbeat for WebSocket: {websocket_id}")
+            return True
+
+        except Exception as e:
+            logger.error(f"Failed to update heartbeat for WebSocket {websocket_id}: {e}")
+            return False
+
     def update_heartbeat(self, websocket_id: str) -> bool:
         """Update heartbeat timestamp for a connection"""
         try:
